@@ -10,8 +10,14 @@ pub enum CharacterTypeEnum {
 
 #[derive(Clone, PartialEq)]
 pub enum CharacterClassEnum {
-    Warrior,
+    Alchemist,
+    Bard,
+    Cardinal,
+    Forager,
+    Merchant,
     Hunter,
+    Thief,
+    Warrior,
 }
 
 
