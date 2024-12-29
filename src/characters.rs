@@ -8,6 +8,7 @@ pub enum CharacterTypeEnum {
     Mob,
 }
 
+#[derive(Clone, PartialEq)]
 pub enum CharacterClassEnum {
     Warrior,
     Hunter,

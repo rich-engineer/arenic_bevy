@@ -21,14 +21,11 @@ fn example_system(storage: Res<LocalStorage>) {
 }
 
 fn character_startup_system(mut commands: Commands, ability_pool: Res<abilities::AbilityPool>) {
-    // Sample 1 to 4 abilities from the pool
-    let sampled_abilities = ability_pool.sample_random();
-
     let hunter_entity =  commands.spawn((
         Name("Dean".to_string()),
         CharacterType(CharacterTypeEnum::Hero),
         CharacterClass(CharacterClassEnum::Hunter),
-        CharacterAbilities(sampled_abilities),
+        CharacterAbilities(ability_pool.sample_random(CharacterClassEnum::Hunter)),
     )).id();
 
     info!("Hunter has been spawned successfully with Entity ID: {:?}",  hunter_entity);
