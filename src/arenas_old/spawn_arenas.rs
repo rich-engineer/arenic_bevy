@@ -1,5 +1,5 @@
 // use super::components::{ArenaComponent, ArenaNames, ArenaRootComponent, TileComponent};
-// use crate::arenas::setup_scene::ScreenDimensions;
+// use crate::arenas_old::setup_scene::ScreenDimensions;
 // use bevy::prelude::*;
 //
 // fn get_arena_colors() -> [Color; 8] {
@@ -16,8 +16,8 @@
 // }
 //
 // pub fn spawn_arenas(mut commands: Commands) {
-//     // Root component that says we want 2 rows x 4 columns of arenas.
-//     let arenas = ArenaRootComponent {
+//     // Root component that says we want 2 rows x 4 columns of arenas_old.
+//     let arenas_old = ArenaRootComponent {
 //         arena_id: 1,
 //         arena_total_columns: 4,
 //         arena_total_rows: 2,
@@ -33,7 +33,7 @@
 //     // 1) Spawn a single "arenas_entity"
 //     let arenas_entity = commands
 //         .spawn((
-//             arenas,
+//             arenas_old,
 //             Transform::default(),
 //             GlobalTransform::default(),
 //             Visibility::default(),
@@ -49,7 +49,7 @@
 //     let gap_x = 50.0;
 //     let gap_y = 50.0;
 //
-//     let total_arenas = 2 * 4; // 8 total arenas
+//     let total_arenas = 2 * 4; // 8 total arenas_old
 //     for arena_index in 0..total_arenas {
 //         // Pick a color for this arena by cycling through the 8 color array
 //         let color_index = arena_index % colors.len();

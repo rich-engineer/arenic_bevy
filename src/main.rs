@@ -1,4 +1,4 @@
-// mod arenas;
+// mod arenas_old;
 mod local_storage;
 mod abilities;
 mod interactions;
@@ -48,7 +48,7 @@ fn log_hunter_abilities_system(
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        // .insert_resource(arenas::ScreenDimensions::default())
+        // .insert_resource(arenas_old::ScreenDimensions::default())
         .add_plugins(abilities::AbilitiesPlugin)
         .add_plugins(LocalStoragePlugin)
         .add_systems(
@@ -56,9 +56,9 @@ fn main() {
             (
                 example_system,
                 character_startup_system,
-                // arenas::resize_system,
-                // arenas::setup_scene,
-                // arenas::spawn_arenas,
+                // arenas_old::resize_system,
+                // arenas_old::setup_scene,
+                // arenas_old::spawn_arenas,
             ),
 
         )
