@@ -11,6 +11,7 @@ use bevy::prelude::*;
 use local_storage::{LocalStorage, LocalStoragePlugin};
 use crate::abilities::AbilityPoolExt;
 use crate::characters::{CharacterAbilities, CharacterClass, CharacterClassEnum, CharacterType, CharacterTypeEnum};
+use crate::interactions::{InputBinding, KeyBinding};
 use crate::metadata::Name;
 
 fn example_system(storage: Res<LocalStorage>) {
@@ -47,6 +48,8 @@ fn log_hunter_abilities_system(
     }
 }
 
+
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -65,6 +68,6 @@ fn main() {
             ),
 
         )
-        .add_systems(Update, log_hunter_abilities_system)
+        // .add_systems(Update, log_hunter_abilities_system)
         .run();
 }
