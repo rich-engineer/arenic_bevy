@@ -25,7 +25,7 @@ pub enum CastTypeEnum {
 #[derive(Component, Clone)]
 pub struct Ability {
     pub(crate) name: String,
-    description: Description(String),
+    description: String,
     cooldown: u8,
     target_type: TargetTypeEnum,
     cast_type: CastTypeEnum,
@@ -57,7 +57,7 @@ impl Plugin for AbilitiesPlugin {
         app.insert_resource(AbilityPool(vec![
             Ability {
                 name: "Split Shot".to_string(),
-                description: Description("Next auto shot will fork".to_string()),
+                description: "Next auto shot will fork".to_string(),
                 cooldown: 5,
                 cast_type: CastTypeEnum::InstantCast,
                 interactions: vec![
@@ -68,7 +68,7 @@ impl Plugin for AbilitiesPlugin {
             },
             Ability {
                 name: "Auto Shot".to_string(),
-                description: Description("Places a trap on the grid that deals damage when an enemy steps on it.".to_string()),
+                description: "Places a trap on the grid that deals damage when an enemy steps on it.".to_string(),
                 cooldown: 1,
                 target_type: TargetTypeEnum::Directional,
                 cast_type: CastTypeEnum::InstantCast,
@@ -79,7 +79,7 @@ impl Plugin for AbilitiesPlugin {
             },
             Ability {
                 name: "Trap".to_string(),
-                description: Description("Lays a trap down on current grid space. If enemy touch it small AOE explosion 2x2.".to_string()),
+                description: "Lays a trap down on current grid space. If enemy touch it small AOE explosion 2x2.".to_string(),
                 cooldown: 3,
                 target_type: TargetTypeEnum::CurrentGridTarget,
                 cast_type: CastTypeEnum::CastTime,
@@ -91,7 +91,7 @@ impl Plugin for AbilitiesPlugin {
             },
             Ability {
                 name: "Sniper".to_string(),
-                description: Description("Fires any distance always at the boss".to_string()),
+                description: "Fires any distance always at the boss".to_string(),
                 cooldown: 9,
                 target_type: TargetTypeEnum::BossTarget,
                 cast_type: CastTypeEnum::InstantCast,
