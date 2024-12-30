@@ -3,10 +3,12 @@ mod abilities;
 mod arenas;
 mod characters;
 mod interactions;
+mod state;
 
-use crate::characters::{CharacterSpawner, CharacterTypeEnum};
+
+use state::{SelectedCharacter, StatePlugin};
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
-use characters::{CharacterClassEnum, CharactersPlugin};
+use characters::{CharacterClassEnum, CharactersPlugin, CharacterSpawner, CharacterTypeEnum};
 use interactions::InteractionsPlugin;
 
 fn main() {
@@ -15,11 +17,12 @@ fn main() {
         .add_plugins(AbilitiesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)
+        .add_plugins(StatePlugin)
         .add_systems(Startup, start_game)
         .run();
 }
 
-fn start_game(mut commands: Commands) {
+fn start_game(mut commands: Commands, mut selected_character: ResMut<SelectedCharacter>) {
     let ability1 = AbilitySpawner::spawn_ability(
         &mut commands,
         "Split Shot",
@@ -58,11 +61,13 @@ fn start_game(mut commands: Commands) {
         vec![CharacterClassEnum::Hunter],
     );
     // help me set this character to a new resource below
-    CharacterSpawner::spawn_character(
+    let guild_master = CharacterSpawner::spawn_character(
         &mut commands,
         "Dean",
         CharacterTypeEnum::Hero,
         CharacterClassEnum::Hunter,
         vec![ability1, ability2, ability3, ability4],
-    )
+    );
+
+    selected_character.0 = Some(guild_master);
 }
