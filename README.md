@@ -33,3 +33,7 @@ Fonts Used:
 
 This is my first game be nice to me!
 Linkedin: https://www.linkedin.com/in/morningharwood
+
+---
+Calculate LoC daily:
+- git log --since=midnight --diff-filter=A --name-only --pretty=format: | sort -u | xargs cloc

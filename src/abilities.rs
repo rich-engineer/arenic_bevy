@@ -1,12 +1,35 @@
 use bevy::prelude::*;
 use crate::characters::{CharacterClass, CharacterClassEnum};
-use crate::interactions::Interaction;
+use crate::interactions::{InputBinding, Interaction, InteractionMode, KeyBinding};
+use crate::metadata::Description;
+
+
+#[derive(Clone)]
+pub enum TargetTypeEnum {
+    SingleTarget,
+    MultiTarget,
+    AreaOfEffect { radius: f32 },
+    SelfTarget,
+    BossTarget,
+    CurrentGridTarget,
+    Directional,
+    Global,
+}
+
+#[derive(Clone)]
+pub enum CastTypeEnum {
+    InstantCast,
+    CastTime,
+}
 
 #[derive(Component, Clone)]
 pub struct Ability {
     pub(crate) name: String,
+    description: Description(String),
     cooldown: u8,
-    interaction: Interaction,
+    target_type: TargetTypeEnum,
+    cast_type: CastTypeEnum,
+    interactions: Vec<Interaction>,
     owner_classes: Vec<CharacterClassEnum>,
 }
 
@@ -31,66 +54,50 @@ pub struct AbilitiesPlugin;
 
 impl Plugin for AbilitiesPlugin {
     fn build(&self, app: &mut App) {
-        // Insert the AbilityPool resource with 10 example abilities
         app.insert_resource(AbilityPool(vec![
             Ability {
                 name: "Split Shot".to_string(),
+                description: Description("Next auto shot will fork".to_string()),
                 cooldown: 5,
-                interaction: Interaction::Tap,
+                cast_type: CastTypeEnum::InstantCast,
+                interactions: vec![
+                    Interaction{ binding: InputBinding::Keyboard(KeyBinding::Single(KeyCode::Digit1)), mode: InteractionMode::Tap }
+                ],
+                target_type: TargetTypeEnum::Directional,
                 owner_classes: vec![CharacterClassEnum::Hunter]
             },
             Ability {
-                name: "Explosive Arrow".to_string(),
-                cooldown: 10,
-                interaction: Interaction::Hold,
+                name: "Auto Shot".to_string(),
+                description: Description("Places a trap on the grid that deals damage when an enemy steps on it.".to_string()),
+                cooldown: 1,
+                target_type: TargetTypeEnum::Directional,
+                cast_type: CastTypeEnum::InstantCast,
+                interactions: vec![
+                    Interaction{ binding: InputBinding::Keyboard(KeyBinding::Single(KeyCode::Digit2)), mode: InteractionMode::Hold }
+                ],
                 owner_classes: vec![CharacterClassEnum::Hunter]
             },
             Ability {
-                name: "Rain of Arrows".to_string(),
-                cooldown: 8,
-                interaction: Interaction::HoldRelease,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Piercing Shot".to_string(),
-                cooldown: 6,
-                interaction: Interaction::Tap,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Shadow Step".to_string(),
-                cooldown: 4,
-                interaction: Interaction::Hold,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Poison Arrow".to_string(),
-                cooldown: 7,
-                interaction: Interaction::Tap,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Trap Mastery".to_string(),
-                cooldown: 12,
-                interaction: Interaction::HoldRelease,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Flame Arrow".to_string(),
-                cooldown: 9,
-                interaction: Interaction::Hold,
-                owner_classes: vec![CharacterClassEnum::Hunter]
-            },
-            Ability {
-                name: "Quick Draw".to_string(),
+                name: "Trap".to_string(),
+                description: Description("Lays a trap down on current grid space. If enemy touch it small AOE explosion 2x2.".to_string()),
                 cooldown: 3,
-                interaction: Interaction::Tap,
+                target_type: TargetTypeEnum::CurrentGridTarget,
+                cast_type: CastTypeEnum::CastTime,
+                interactions:
+                vec![
+                    Interaction{ binding: InputBinding::Keyboard(KeyBinding::Single(KeyCode::Digit3)), mode: InteractionMode::HoldRelease }
+                ],
                 owner_classes: vec![CharacterClassEnum::Hunter]
             },
             Ability {
-                name: "Eagle Eye".to_string(),
-                cooldown: 5,
-                interaction: Interaction::HoldRelease,
+                name: "Sniper".to_string(),
+                description: Description("Fires any distance always at the boss".to_string()),
+                cooldown: 9,
+                target_type: TargetTypeEnum::BossTarget,
+                cast_type: CastTypeEnum::InstantCast,
+                interactions: vec![
+                    Interaction{ binding: InputBinding::Keyboard(KeyBinding::Single(KeyCode::Digit4)), mode: InteractionMode::Tap }
+                ],
                 owner_classes: vec![CharacterClassEnum::Hunter]
             },
         ]));

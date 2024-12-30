@@ -2,15 +2,16 @@
 mod local_storage;
 mod abilities;
 mod interactions;
-mod names;
+mod metadata;
 mod characters;
 mod arenas;
+mod scenes;
 
 use bevy::prelude::*;
 use local_storage::{LocalStorage, LocalStoragePlugin};
 use crate::abilities::AbilityPoolExt;
 use crate::characters::{CharacterAbilities, CharacterClass, CharacterClassEnum, CharacterType, CharacterTypeEnum};
-use crate::names::Name;
+use crate::metadata::Name;
 
 fn example_system(storage: Res<LocalStorage>) {
     storage.save_string("my_key2", "Hello from Cross-Platform Storage!");
@@ -64,6 +65,6 @@ fn main() {
             ),
 
         )
-        // .add_systems(Update, log_hunter_abilities_system)
+        .add_systems(Update, log_hunter_abilities_system)
         .run();
 }

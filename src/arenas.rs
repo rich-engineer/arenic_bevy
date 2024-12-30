@@ -11,6 +11,7 @@ pub enum ArenaEnum {
     Crucible,
     Casino,
     Gala,
+    GuildHouse
 }
 
 #[derive(Component)]
@@ -68,6 +69,11 @@ impl Plugin for ArenaPlugin {
                 battle_duration_seconds: 120,
                 owner_classes: vec![CharacterClassEnum::Bard],
             },
+            Arena {
+                name: ArenaEnum::GuildHouse,
+                battle_duration_seconds: 0,
+                owner_classes: vec![CharacterClassEnum::GuildMaster],
+            }
         ]));
     }
 }

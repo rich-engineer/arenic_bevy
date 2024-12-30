@@ -18,6 +18,7 @@ pub enum CharacterClassEnum {
     Hunter,
     Thief,
     Warrior,
+    GuildMaster
 }
 
 
