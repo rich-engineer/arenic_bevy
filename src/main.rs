@@ -57,7 +57,7 @@ fn start_game(mut commands: Commands) {
         CastTypeEnum::InstantCast,
         vec![CharacterClassEnum::Hunter],
     );
-
+    // help me set this character to a new resource below
     CharacterSpawner::spawn_character(
         &mut commands,
         "Dean",
