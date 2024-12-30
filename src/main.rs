@@ -4,6 +4,7 @@ mod abilities;
 mod interactions;
 mod names;
 mod characters;
+mod arenas;
 
 use bevy::prelude::*;
 use local_storage::{LocalStorage, LocalStoragePlugin};
@@ -50,6 +51,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         // .insert_resource(arenas_old::ScreenDimensions::default())
         .add_plugins(abilities::AbilitiesPlugin)
+        .add_plugins(arenas::ArenaPlugin)
         .add_plugins(LocalStoragePlugin)
         .add_systems(
             Startup,
