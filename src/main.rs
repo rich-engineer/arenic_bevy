@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 mod abilities;
+mod arenas;
 mod characters;
 mod interactions;
-mod arenas;
 
-use abilities::{AbilitySpawner, TargetTypeEnum, CastTypeEnum, AbilitiesPlugin};
+use crate::characters::{CharacterSpawner, CharacterTypeEnum};
+use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
 use characters::{CharacterClassEnum, CharactersPlugin};
 use interactions::InteractionsPlugin;
-use crate::characters::{CharacterSpawner, CharacterTypeEnum};
 
 fn main() {
     App::new()
@@ -20,7 +20,6 @@ fn main() {
 }
 
 fn start_game(mut commands: Commands) {
-
     let ability1 = AbilitySpawner::spawn_ability(
         &mut commands,
         "Split Shot",
@@ -58,12 +57,12 @@ fn start_game(mut commands: Commands) {
         CastTypeEnum::InstantCast,
         vec![CharacterClassEnum::Hunter],
     );
+
     CharacterSpawner::spawn_character(
         &mut commands,
         "Dean",
         CharacterTypeEnum::Hero,
         CharacterClassEnum::Hunter,
-        vec![ability1, ability2, ability3, ability4]
+        vec![ability1, ability2, ability3, ability4],
     )
-
 }

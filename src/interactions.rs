@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::abilities::Cooldown;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct KeyboardInput {
@@ -18,6 +18,11 @@ pub enum InteractionMode {
     Tap,
     HoldRelease,
     Hold,
+}
+
+#[derive(Component)]
+pub struct KeyBindingsForAbility {
+    pub bindings: Vec<(Entity, KeyCode)>,
 }
 
 fn handle_keyboard_input(

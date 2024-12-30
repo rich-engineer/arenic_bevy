@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::characters::CharacterClassEnum;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Cooldown {
@@ -47,8 +47,7 @@ pub struct AbilitiesPlugin;
 
 impl Plugin for AbilitiesPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<AbilitySpawner>()
+        app.init_resource::<AbilitySpawner>()
             .add_systems(Update, update_cooldowns);
     }
 }
