@@ -1,6 +1,6 @@
+use crate::characters::CharacterClassEnum;
 use bevy::app::App;
 use bevy::prelude::{Component, Plugin, Resource};
-use crate::characters::CharacterClassEnum;
 
 pub enum ArenaEnum {
     Labyrinth,
@@ -11,11 +11,11 @@ pub enum ArenaEnum {
     Crucible,
     Casino,
     Gala,
-    GuildHouse
+    GuildHouse,
 }
 
 #[derive(Component)]
-pub struct Arena{
+pub struct Arena {
     pub name: ArenaEnum,
     battle_duration_seconds: u8,
     owner_classes: Vec<CharacterClassEnum>,
@@ -73,7 +73,7 @@ impl Plugin for ArenaPlugin {
                 name: ArenaEnum::GuildHouse,
                 battle_duration_seconds: 0,
                 owner_classes: vec![CharacterClassEnum::GuildMaster],
-            }
+            },
         ]));
     }
 }

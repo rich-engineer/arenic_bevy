@@ -1,73 +1,68 @@
-// mod arenas_old;
-mod local_storage;
-mod abilities;
-mod interactions;
-mod metadata;
-mod characters;
-mod arenas;
-mod scenes;
-
 use bevy::prelude::*;
-use local_storage::{LocalStorage, LocalStoragePlugin};
-use crate::abilities::AbilityPoolExt;
-use crate::characters::{CharacterAbilities, CharacterClass, CharacterClassEnum, CharacterType, CharacterTypeEnum};
-use crate::interactions::{InputBinding, KeyBinding};
-use crate::metadata::Name;
+mod abilities;
+mod arenas;
+mod characters;
+mod interactions;
 
-fn example_system(storage: Res<LocalStorage>) {
-    storage.save_string("my_key2", "Hello from Cross-Platform Storage!");
-    if let Some(loaded) = storage.load_string("my_key2") {
-        info!("Loaded: {}", loaded);
-    } else {
-        info!("No value found for 'my_key2'.");
-    }
-}
-
-fn character_startup_system(mut commands: Commands, ability_pool: Res<abilities::AbilityPool>) {
-    let hunter_entity =  commands.spawn((
-        Name("Dean".to_string()),
-        CharacterType(CharacterTypeEnum::Hero),
-        CharacterClass(CharacterClassEnum::Hunter),
-        CharacterAbilities(ability_pool.sample_random(CharacterClassEnum::Hunter)),
-    )).id();
-
-    info!("Hunter has been spawned successfully with Entity ID: {:?}",  hunter_entity);
-
-}
-
-fn log_hunter_abilities_system(
-    query: Query<(&Name, &CharacterClass, &CharacterAbilities), With<CharacterType>>,
-) {
-    for (name, class, abilities) in &query {
-        if let CharacterClassEnum::Hunter = class.0 {
-            info!("{} the Hunter has these abilities:", name.0);
-            for ability in &abilities.0 {
-                info!(" - {}", ability.name);
-            }
-        }
-    }
-}
-
-
+use crate::characters::{CharacterSpawner, CharacterTypeEnum};
+use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
+use characters::{CharacterClassEnum, CharactersPlugin};
+use interactions::InteractionsPlugin;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        // .insert_resource(arenas_old::ScreenDimensions::default())
-        .add_plugins(abilities::AbilitiesPlugin)
-        .add_plugins(arenas::ArenaPlugin)
-        .add_plugins(LocalStoragePlugin)
-        .add_systems(
-            Startup,
-            (
-                example_system,
-                character_startup_system,
-                // arenas_old::resize_system,
-                // arenas_old::setup_scene,
-                // arenas_old::spawn_arenas,
-            ),
-
-        )
-        // .add_systems(Update, log_hunter_abilities_system)
+        .add_plugins(AbilitiesPlugin)
+        .add_plugins(CharactersPlugin)
+        .add_plugins(InteractionsPlugin)
+        .add_systems(Startup, start_game)
         .run();
+}
+
+fn start_game(mut commands: Commands) {
+    let ability1 = AbilitySpawner::spawn_ability(
+        &mut commands,
+        "Split Shot",
+        "Next auto shot will fork",
+        5.0,
+        TargetTypeEnum::Directional,
+        CastTypeEnum::InstantCast,
+        vec![CharacterClassEnum::Hunter],
+    );
+    let ability2 = AbilitySpawner::spawn_ability(
+        &mut commands,
+        "Auto Shot",
+        "Automatically fires shots in the forward direction",
+        1.0,
+        TargetTypeEnum::Directional,
+        CastTypeEnum::InstantCast,
+        vec![CharacterClassEnum::Hunter],
+    );
+    let ability3 = AbilitySpawner::spawn_ability(
+        &mut commands,
+        "Trap",
+        "Places a trap on the grid that deals damage when an enemy steps on it.",
+        1.0,
+        TargetTypeEnum::Directional,
+        CastTypeEnum::InstantCast,
+        vec![CharacterClassEnum::Hunter],
+    );
+
+    let ability4 = AbilitySpawner::spawn_ability(
+        &mut commands,
+        "Snipe",
+        "Fires any distance always at the boss",
+        4.0,
+        TargetTypeEnum::BossTarget,
+        CastTypeEnum::InstantCast,
+        vec![CharacterClassEnum::Hunter],
+    );
+
+    CharacterSpawner::spawn_character(
+        &mut commands,
+        "Dean",
+        CharacterTypeEnum::Hero,
+        CharacterClassEnum::Hunter,
+        vec![ability1, ability2, ability3, ability4],
+    )
 }
