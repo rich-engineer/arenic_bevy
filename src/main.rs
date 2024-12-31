@@ -4,17 +4,22 @@ mod arenas;
 mod characters;
 mod interactions;
 mod state;
+mod cameras;
+mod tiles;
 
-
-use state::{SelectedCharacter, StatePlugin};
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
-use characters::{CharacterClassEnum, CharactersPlugin, CharacterSpawner, CharacterTypeEnum};
+use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
 use interactions::InteractionsPlugin;
+use state::{SelectedCharacter, StatePlugin};
+use cameras::CamerasPlugin;
+use tiles::TilesPlugin;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(CamerasPlugin)
         .add_plugins(AbilitiesPlugin)
+        .add_plugins(TilesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)
         .add_plugins(StatePlugin)

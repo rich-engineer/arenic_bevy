@@ -60,7 +60,7 @@ impl CharacterSpawner {
         character_type: CharacterTypeEnum,
         character_class: CharacterClassEnum,
         class_abilities: Vec<Entity>,
-    ) -> Entity  {
+    ) -> Entity {
         let key_bindings = class_abilities
             .iter()
             .enumerate()
@@ -75,17 +75,19 @@ impl CharacterSpawner {
                 (entity, key)
             })
             .collect();
-        let spawned_character = commands.spawn((
-            CharacterName(character_name.to_string()),
-            CharacterType(character_type),
-            CharacterClass(character_class),
-            CharacterAbilities {
-                abilities: class_abilities,
-            },
-            KeyBindingsForAbility {
-                bindings: key_bindings,
-            },
-        )).id();
+        let spawned_character = commands
+            .spawn((
+                CharacterName(character_name.to_string()),
+                CharacterType(character_type),
+                CharacterClass(character_class),
+                CharacterAbilities {
+                    abilities: class_abilities,
+                },
+                KeyBindingsForAbility {
+                    bindings: key_bindings,
+                },
+            ))
+            .id();
 
         spawned_character
     }
