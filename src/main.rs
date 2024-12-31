@@ -24,6 +24,7 @@ fn main() {
         .add_plugins(InteractionsPlugin)
         .add_plugins(StatePlugin)
         .add_systems(Startup, start_game)
+        .add_systems(Update, spawn_selected_character)
         .run();
 }
 
@@ -75,4 +76,22 @@ fn start_game(mut commands: Commands, mut selected_character: ResMut<SelectedCha
     );
 
     selected_character.0 = Some(guild_master);
+}
+
+
+fn spawn_selected_character(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    selected: Res<SelectedCharacter>,
+) {
+    if selected.0.is_some() {
+        commands.spawn((
+            Sprite {
+                image: asset_server.load("selected_player.png"),
+                custom_size: Some(Vec2::new(10.0, 10.0)),
+                ..default()
+            },
+            Transform::from_xyz(0.0, 0.0, 1.0),
+        ));
+    }
 }
