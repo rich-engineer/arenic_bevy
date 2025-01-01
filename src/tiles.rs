@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
-const GRID_WIDTH: usize = 64;
+const GRID_WIDTH: usize = 63;
 const GRID_HEIGHT: usize = 31;
 const TILE_SIZE: f32 = 19.0;
+
 
 fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
@@ -21,7 +22,7 @@ fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
             commands.spawn((
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("default_tile.png"),
+                    image: asset_server.load("UI/default_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),

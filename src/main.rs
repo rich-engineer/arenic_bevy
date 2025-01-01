@@ -16,7 +16,7 @@ use tiles::TilesPlugin;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(CamerasPlugin)
         .add_plugins(AbilitiesPlugin)
         .add_plugins(TilesPlugin)
@@ -87,8 +87,8 @@ fn spawn_selected_character(
     if selected.0.is_some() {
         commands.spawn((
             Sprite {
-                image: asset_server.load("selected_player.png"),
-                custom_size: Some(Vec2::new(10.0, 10.0)),
+                image: asset_server.load("UI/player_selected.png"),
+                custom_size: Some(Vec2::new(16.0, 16.0)),
                 ..default()
             },
             Transform::from_xyz(0.0, 0.0, 1.0),
