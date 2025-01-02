@@ -6,7 +6,7 @@ pub fn setup_scene(mut commands: Commands) {
         Camera2d,
         OrthographicProjection {
             near: -1000.0,
-            scale: 1.0,
+            scale: 3.0,
             far: 1000.0,
             viewport_origin: Vec2::new(0.5, 0.5),
             scaling_mode: ScalingMode::AutoMin {

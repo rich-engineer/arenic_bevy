@@ -7,7 +7,9 @@ mod interactions;
 mod state;
 mod tiles;
 mod title;
+mod global_chat;
 
+use crate::state::GameState;
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
 use cameras::CamerasPlugin;
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
@@ -15,7 +17,7 @@ use interactions::InteractionsPlugin;
 use state::{SelectedCharacter, StatePlugin};
 use tiles::TilesPlugin;
 use title::TitlePlugin;
-use crate::state::GameState;
+use global_chat::GlobalChatPlugin;
 
 fn main() {
     App::new()
@@ -27,8 +29,13 @@ fn main() {
         .add_plugins(TilesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)
+        .add_plugins(GlobalChatPlugin)
         .add_systems(Startup, start_game)
-        .add_systems(Update, spawn_selected_character.run_if(in_state(GameState::Start)))
+
+        .add_systems(
+            Update,
+            spawn_selected_character.run_if(in_state(GameState::Start)),
+        )
         .run();
 }
 

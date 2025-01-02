@@ -53,4 +53,5 @@ pub enum GameState {
     #[default]
     Title,
     Start,
+    GuildHouse,
 }
