@@ -8,7 +8,7 @@ const TILE_SIZE: f32 = 19.0;
 #[derive(Component)]
 struct GridUI;
 
-fn draw_forager_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn draw_hunter_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -26,7 +26,7 @@ fn draw_forager_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/forager_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -53,7 +53,7 @@ fn draw_alchemist_arena(mut commands: Commands, asset_server: Res<AssetServer>) 
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/alchemist_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -61,7 +61,7 @@ fn draw_alchemist_arena(mut commands: Commands, asset_server: Res<AssetServer>) 
         }
     }
 }
-fn draw_hunter_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn draw_forager_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -79,7 +79,7 @@ fn draw_hunter_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/hunter_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -87,7 +87,7 @@ fn draw_hunter_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
         }
     }
 }
-fn draw_guild_house(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn draw_warrior_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -105,7 +105,7 @@ fn draw_guild_house(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/guild_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -113,7 +113,7 @@ fn draw_guild_house(mut commands: Commands, asset_server: Res<AssetServer>) {
         }
     }
 }
-fn draw_warrior_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn draw_guild_house(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -131,7 +131,7 @@ fn draw_warrior_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/warrior_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -157,7 +157,7 @@ fn draw_merchant_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/merchant_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -184,7 +184,7 @@ fn draw_cardinal_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/cardinal_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -210,7 +210,7 @@ fn draw_thief_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/thief_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
@@ -236,7 +236,7 @@ fn draw_bard_arena(mut commands: Commands, asset_server: Res<AssetServer>) {
                 GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
-                    image: asset_server.load("UI/default_tile.png"),
+                    image: asset_server.load("UI/bard_tile.png"),
                     ..default()
                 },
                 Transform::from_xyz(x, y, 0.0),
