@@ -15,8 +15,9 @@ pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SelectedCharacter>();
-            // .add_systems(Update, log_selected_character_abilities);
+        app.init_resource::<SelectedCharacter>()
+            .init_state::<GameState>();
+        // .add_systems(Update, log_selected_character_abilities);
     }
 }
 
@@ -44,4 +45,12 @@ fn log_selected_character_abilities(
     } else {
         println!("No character selected.");
     }
+}
+
+// Define game states
+#[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+pub enum GameState {
+    #[default]
+    Title,
+    Start,
 }

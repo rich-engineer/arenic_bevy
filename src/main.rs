@@ -1,30 +1,33 @@
 use bevy::prelude::*;
 mod abilities;
 mod arenas;
+mod cameras;
 mod characters;
 mod interactions;
 mod state;
-mod cameras;
 mod tiles;
+mod title;
 
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
+use cameras::CamerasPlugin;
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
 use interactions::InteractionsPlugin;
 use state::{SelectedCharacter, StatePlugin};
-use cameras::CamerasPlugin;
 use tiles::TilesPlugin;
+use title::TitlePlugin;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(CamerasPlugin)
+        .add_plugins(TitlePlugin)
         .add_plugins(AbilitiesPlugin)
-        .add_plugins(TilesPlugin)
+        // .add_plugins(TilesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)
         .add_plugins(StatePlugin)
         .add_systems(Startup, start_game)
-        .add_systems(Update, spawn_selected_character)
+        // .add_systems(Update, spawn_selected_character)
         .run();
 }
 
@@ -77,7 +80,6 @@ fn start_game(mut commands: Commands, mut selected_character: ResMut<SelectedCha
 
     selected_character.0 = Some(guild_master);
 }
-
 
 fn spawn_selected_character(
     mut commands: Commands,

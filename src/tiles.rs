@@ -4,7 +4,6 @@ const GRID_WIDTH: usize = 63;
 const GRID_HEIGHT: usize = 31;
 const TILE_SIZE: f32 = 19.0;
 
-
 fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
