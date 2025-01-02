@@ -3,21 +3,20 @@ mod abilities;
 mod arenas;
 mod cameras;
 mod characters;
+mod global_chat;
 mod interactions;
 mod state;
 mod tiles;
 mod title;
-mod global_chat;
 
-use crate::state::GameState;
+use crate::state::{GameState, GlobalState, StatePlugin};
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
 use cameras::CamerasPlugin;
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
+use global_chat::GlobalChatPlugin;
 use interactions::InteractionsPlugin;
-use state::{SelectedCharacter, StatePlugin};
 use tiles::TilesPlugin;
 use title::TitlePlugin;
-use global_chat::GlobalChatPlugin;
 
 fn main() {
     App::new()
@@ -31,7 +30,6 @@ fn main() {
         .add_plugins(InteractionsPlugin)
         .add_plugins(GlobalChatPlugin)
         .add_systems(Startup, start_game)
-
         .add_systems(
             Update,
             spawn_selected_character.run_if(in_state(GameState::Start)),
@@ -39,7 +37,7 @@ fn main() {
         .run();
 }
 
-fn start_game(mut commands: Commands, mut selected_character: ResMut<SelectedCharacter>) {
+fn start_game(mut commands: Commands, mut global_state: ResMut<GlobalState>) {
     let ability1 = AbilitySpawner::spawn_ability(
         &mut commands,
         "Split Shot",
@@ -86,15 +84,15 @@ fn start_game(mut commands: Commands, mut selected_character: ResMut<SelectedCha
         vec![ability1, ability2, ability3, ability4],
     );
 
-    selected_character.0 = Some(guild_master);
+    global_state.selected_character = Some(guild_master);
 }
 
 fn spawn_selected_character(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    selected: Res<SelectedCharacter>,
+    global_state: Res<GlobalState>,
 ) {
-    if selected.0.is_some() {
+    if global_state.selected_character.is_some() {
         commands.spawn((
             Sprite {
                 image: asset_server.load("UI/player_selected.png"),

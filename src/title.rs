@@ -1,13 +1,12 @@
-use bevy::{
-    prelude::*,
-    app::{App, Plugin},
-    color::palettes::tailwind::{GRAY_100, GRAY_200, GRAY_300, GRAY_50, GRAY_950},
-    ui::{FocusPolicy, JustifyContent, Display::Flex},
-    window::{SystemCursorIcon},
-    winit::cursor::{CursorIcon},
-};
 use crate::state::GameState;
-
+use bevy::{
+    app::{App, Plugin},
+    color::palettes::tailwind::{GRAY_100, GRAY_200, GRAY_50, GRAY_950},
+    prelude::*,
+    ui::{Display::Flex, FocusPolicy, JustifyContent},
+    window::SystemCursorIcon,
+    winit::cursor::CursorIcon,
+};
 
 #[derive(Component)]
 struct TitleScreenUI;
@@ -18,7 +17,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands
         .spawn((
-                   TitleScreenUI,
+            TitleScreenUI,
             Node {
                 display: Flex,
                 justify_content: JustifyContent::Center,
@@ -32,7 +31,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|div| {
             div.spawn((
-                          TitleScreenUI,
+                TitleScreenUI,
                 Node {
                     display: Flex,
                     flex_direction: FlexDirection::Column,
@@ -49,7 +48,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
             ));
 
             div.spawn((
-                          TitleScreenUI,
+                TitleScreenUI,
                 Node {
                     padding: UiRect {
                         left: Val::Px(36.0),
@@ -59,9 +58,9 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
                     },
                     border: UiRect {
                         left: Val::Px(1.0),
-                        right: Val::Px(1.0) ,
-                        top: Val::Px(1.0)  ,
-                        bottom: Val::Px(1.0)
+                        right: Val::Px(1.0),
+                        top: Val::Px(1.0),
+                        bottom: Val::Px(1.0),
                     },
                     display: Flex,
                     justify_content: JustifyContent::Center,
@@ -77,7 +76,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
             ))
             .with_children(|parent| {
                 parent.spawn((
-                                 TitleScreenUI,
+                    TitleScreenUI,
                     Text::new("Start"),
                     TextFont {
                         font: font_light,
@@ -95,14 +94,15 @@ pub struct TitlePlugin;
 
 impl Plugin for TitlePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(Startup, init_cursor_icons)
+        app.add_systems(Startup, init_cursor_icons)
             .add_systems(OnEnter(GameState::Title), setup_title)
-            .add_systems(Update, start_button_system.run_if(in_state(GameState::Title)))
+            .add_systems(
+                Update,
+                start_button_system.run_if(in_state(GameState::Title)),
+            )
             .add_systems(OnExit(GameState::Title), cleanup_title);
     }
 }
-
 
 fn cleanup_title(mut commands: Commands, query: Query<Entity, With<TitleScreenUI>>) {
     for entity in &query {
@@ -111,39 +111,27 @@ fn cleanup_title(mut commands: Commands, query: Query<Entity, With<TitleScreenUI
     }
 }
 
-
 fn start_button_system(
     mut commands: Commands,
     window: Single<Entity, With<Window>>,
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        Changed<Interaction>
-    >,
+    mut interaction_query: Query<(&Interaction, &mut BackgroundColor), Changed<Interaction>>,
     cursor_icons: Res<CursorIcons>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-
     for (interaction, mut color) in &mut interaction_query {
-
         match *interaction {
             Interaction::Pressed => {
                 *color = BackgroundColor(Color::Srgba(GRAY_200));
-                commands
-                    .entity(*window)
-                    .insert(cursor_icons.0[1].clone());
+                commands.entity(*window).insert(cursor_icons.0[1].clone());
                 next_state.set(GameState::Start)
             }
             Interaction::Hovered => {
                 *color = BackgroundColor(Color::Srgba(GRAY_100));
-                commands
-                    .entity(*window)
-                    .insert(cursor_icons.0[1].clone());
+                commands.entity(*window).insert(cursor_icons.0[1].clone());
             }
             Interaction::None => {
                 *color = BackgroundColor(Color::Srgba(GRAY_200));
-                commands
-                    .entity(*window)
-                    .insert(cursor_icons.0[0].clone());
+                commands.entity(*window).insert(cursor_icons.0[0].clone());
             }
         }
     }
