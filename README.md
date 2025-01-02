@@ -37,6 +37,7 @@ Linkedin: https://www.linkedin.com/in/morningharwood
 ---
 Calculate LoC daily:
 - git log --since=midnight --diff-filter=A --name-only --pretty=format: | sort -u | xargs cloc
+- cargo watch -w src -w assets -i target -i .git -x 'run'
 
 
 ---
