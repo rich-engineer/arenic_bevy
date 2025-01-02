@@ -1,9 +1,13 @@
 use bevy::prelude::*;
+use crate::state::GameState;
 
 const GRID_WIDTH: usize = 63;
 const GRID_HEIGHT: usize = 31;
 const TILE_SIZE: f32 = 19.0;
 
+
+#[derive(Component)]
+struct GridUI;
 fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Calculate the total width and height
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
@@ -19,6 +23,7 @@ fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
             let y = start_y - (row as f32 * TILE_SIZE) - (TILE_SIZE / 2.0);
 
             commands.spawn((
+                               GridUI,
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
                     image: asset_server.load("UI/default_tile.png"),
@@ -29,11 +34,20 @@ fn draw_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
         }
     }
 }
+fn cleanup_grid(mut commands: Commands, query: Query<Entity, With<GridUI>>) {
+    for entity in &query {
+        // Remove this entity and all its children
+        commands.entity(entity).despawn_recursive();
+    }
+}
 
 pub struct TilesPlugin;
 
 impl Plugin for TilesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, draw_grid);
+
+        app
+            .add_systems(OnEnter(GameState::Start), draw_grid)
+            .add_systems(OnExit(GameState::Start), cleanup_grid);
     }
 }

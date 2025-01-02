@@ -15,19 +15,20 @@ use interactions::InteractionsPlugin;
 use state::{SelectedCharacter, StatePlugin};
 use tiles::TilesPlugin;
 use title::TitlePlugin;
+use crate::state::GameState;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(StatePlugin)
         .add_plugins(CamerasPlugin)
         .add_plugins(TitlePlugin)
         .add_plugins(AbilitiesPlugin)
-        // .add_plugins(TilesPlugin)
+        .add_plugins(TilesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)
-        .add_plugins(StatePlugin)
         .add_systems(Startup, start_game)
-        // .add_systems(Update, spawn_selected_character)
+        .add_systems(Update, spawn_selected_character.run_if(in_state(GameState::Start)))
         .run();
 }
 

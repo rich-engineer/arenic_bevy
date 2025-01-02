@@ -8,12 +8,17 @@ use bevy::{
 };
 use crate::state::GameState;
 
+
+#[derive(Component)]
+struct TitleScreenUI;
+
 fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/Migra-Extrabold.ttf");
     let font_light = asset_server.load("fonts/Migra-Extralight.ttf");
 
     commands
         .spawn((
+                   TitleScreenUI,
             Node {
                 display: Flex,
                 justify_content: JustifyContent::Center,
@@ -27,6 +32,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|div| {
             div.spawn((
+                          TitleScreenUI,
                 Node {
                     display: Flex,
                     flex_direction: FlexDirection::Column,
@@ -43,6 +49,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
             ));
 
             div.spawn((
+                          TitleScreenUI,
                 Node {
                     padding: UiRect {
                         left: Val::Px(36.0),
@@ -70,6 +77,7 @@ fn setup_title(mut commands: Commands, asset_server: Res<AssetServer>) {
             ))
             .with_children(|parent| {
                 parent.spawn((
+                                 TitleScreenUI,
                     Text::new("Start"),
                     TextFont {
                         font: font_light,
@@ -90,7 +98,16 @@ impl Plugin for TitlePlugin {
         app
             .add_systems(Startup, init_cursor_icons)
             .add_systems(OnEnter(GameState::Title), setup_title)
-            .add_systems(Update, start_button_system.run_if(in_state(GameState::Title)));
+            .add_systems(Update, start_button_system.run_if(in_state(GameState::Title)))
+            .add_systems(OnExit(GameState::Title), cleanup_title);
+    }
+}
+
+
+fn cleanup_title(mut commands: Commands, query: Query<Entity, With<TitleScreenUI>>) {
+    for entity in &query {
+        // Remove this entity and all its children
+        commands.entity(entity).despawn_recursive();
     }
 }
 
@@ -103,6 +120,7 @@ fn start_button_system(
         Changed<Interaction>
     >,
     cursor_icons: Res<CursorIcons>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
 
     for (interaction, mut color) in &mut interaction_query {
@@ -113,6 +131,7 @@ fn start_button_system(
                 commands
                     .entity(*window)
                     .insert(cursor_icons.0[1].clone());
+                next_state.set(GameState::Start)
             }
             Interaction::Hovered => {
                 *color = BackgroundColor(Color::Srgba(GRAY_100));
@@ -133,7 +152,7 @@ fn start_button_system(
 #[derive(Resource)]
 struct CursorIcons(Vec<CursorIcon>);
 
-fn init_cursor_icons(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn init_cursor_icons(mut commands: Commands) {
     commands.insert_resource(CursorIcons(vec![
         SystemCursorIcon::Default.into(),
         SystemCursorIcon::Pointer.into(),
