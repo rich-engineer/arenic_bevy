@@ -50,7 +50,7 @@ fn top_navigation(mut commands: Commands, asset_server: Res<AssetServer>, global
             align_items: AlignItems::Center,
             flex_direction: FlexDirection::Column,
             width: Val::Percent(100.0),
-            height: Val::Px(36.0),
+            height: Val::Px(TOP_BAR_HEIGHT),
 
             ..default()
         },
@@ -71,7 +71,7 @@ fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
         Text::new(text),
         TextFont {
             font,
-            font_size: 9.0,
+            font_size: FONT_SIZE,
             ..default()
         },
         TextColor(Color::Srgba(GRAY_950)),
@@ -80,6 +80,7 @@ fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
 }
 
 fn spawn_progress_bar(parent: &mut ChildBuilder) {
+    const boss_current_health: f32 = 90.0;
     parent
         .spawn((
             Node {
@@ -97,7 +98,7 @@ fn spawn_progress_bar(parent: &mut ChildBuilder) {
                     position_type: PositionType::Absolute,
                     top: Val::Px(0.0),
                     height: Val::Px(PROGRESS_BAR_HEIGHT),
-                    width: Val::Percent(90.0),
+                    width: Val::Percent(boss_current_health),
                     ..default()
                 },
                 BackgroundColor(Color::Srgba(RED_400)),
