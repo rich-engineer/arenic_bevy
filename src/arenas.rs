@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::characters::CharacterClassEnum;
 use bevy::app::App;
 use bevy::prelude::{Component, Plugin, Resource};
@@ -13,6 +14,25 @@ pub enum ArenaEnum {
     Casino,
     Gala,
     GuildHouse,
+    Menu
+}
+
+impl fmt::Display for ArenaEnum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let class_str = match self {
+            ArenaEnum::Labyrinth => "Labyrinth",
+            ArenaEnum::Sanctum => "Sanctum",
+            ArenaEnum::Pawnshop => "Pawnshop",
+            ArenaEnum::Bastion => "Bastion",
+            ArenaEnum::Mountain => "Mountain",
+            ArenaEnum::Crucible => "Crucible",
+            ArenaEnum::Casino => "Casino",
+            ArenaEnum::Gala => "Gala",
+            ArenaEnum::GuildHouse => "GuildHouse",
+            ArenaEnum::Menu => "---",
+        };
+        write!(f, "{}", class_str)
+    }
 }
 
 #[derive(Component)]
