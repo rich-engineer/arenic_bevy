@@ -3,30 +3,37 @@ use crate::state::{GameState, GlobalState};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use std::f32::consts::PI;
+use bevy::color::palettes::tailwind::GRAY_50;
+use crate::characters::CharacterClassEnum;
 
 #[derive(Resource)]
-struct ArenaCameraPositions(Vec<(ArenaEnum, Vec2)>);
+pub struct ArenaCameraPositions(pub(crate) Vec<(ArenaEnum, CharacterClassEnum, Vec2)>);
+
 
 impl Default for ArenaCameraPositions {
     fn default() -> Self {
         Self(vec![
-            (ArenaEnum::Labyrinth, Vec2::new(1.45, -0.35)),
-            (ArenaEnum::GuildHouse, Vec2::new(0.5, -0.35)),
-            (ArenaEnum::Sanctum,  Vec2::new(-0.45, -0.35)),
-            (ArenaEnum::Mountain, Vec2::new(1.45, 0.5)),
-            (ArenaEnum::Bastion, Vec2::new(0.5, 0.5)),
-            (ArenaEnum::Pawnshop,  Vec2::new(-0.45, 0.5)),
-            (ArenaEnum::Crucible, Vec2::new(1.45, 1.35)),
-            (ArenaEnum::Casino, Vec2::new(0.5, 1.35)),
-            (ArenaEnum::Gala, Vec2::new(-0.45, 1.35)),
+            (ArenaEnum::Labyrinth, CharacterClassEnum::Hunter, Vec2::new(1.45, -0.305)),
+            (ArenaEnum::GuildHouse, CharacterClassEnum::GuildMaster, Vec2::new(0.5, -0.305)),
+            (ArenaEnum::Sanctum, CharacterClassEnum::Cardinal,  Vec2::new(-0.45, -0.305)),
+            (ArenaEnum::Mountain,CharacterClassEnum::Forager, Vec2::new(1.45, 0.54)),
+            (ArenaEnum::Bastion, CharacterClassEnum::Warrior, Vec2::new(0.5, 0.54)),
+            (ArenaEnum::Pawnshop,CharacterClassEnum::Thief,  Vec2::new(-0.45, 0.54)),
+            (ArenaEnum::Crucible,CharacterClassEnum::Alchemist, Vec2::new(1.45, 1.385)),
+            (ArenaEnum::Casino,CharacterClassEnum::Merchant, Vec2::new(0.5, 1.385)),
+            (ArenaEnum::Gala,CharacterClassEnum::Bard, Vec2::new(-0.45, 1.385)),
         ])
     }
 }
 
 pub fn setup_scene(mut commands: Commands, arena_camera_position: Res<ArenaCameraPositions>, global_state: Res<GlobalState>,) {
-    let viewport_origin = arena_camera_position.0[global_state.current_arena as usize].1;
+    let viewport_origin = arena_camera_position.0[global_state.current_arena as usize].2;
     commands.spawn((
         Camera2d,
+        Camera {
+            clear_color: ClearColorConfig::Custom(Color::from(GRAY_50)),
+            ..Default::default()
+        },
         OrthographicProjection {
             near: -1000.0,
             scale: if global_state.active_menu { 3.0 } else { 1.0 },
@@ -57,7 +64,7 @@ fn move_arenas_controls(
         global_state.current_arena = (global_state.current_arena + total_arenas - 1) % total_arenas;
 
         if let Ok(projection) = camera_query.get_single() {
-            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].1;
+            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].2;
             let new_scale = if global_state.active_menu { 3.0 } else { 1.0 };
 
             // Set up animation for position and scale
@@ -76,7 +83,7 @@ fn move_arenas_controls(
         global_state.current_arena = (global_state.current_arena + 1) % total_arenas;
 
         if let Ok(projection) = camera_query.get_single() {
-            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].1;
+            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].2;
             let new_scale = if global_state.active_menu { 3.0 } else { 1.0 };
 
             // Set up animation for position and scale
@@ -96,7 +103,7 @@ fn move_arenas_controls(
         global_state.current_arena = 4; // Assuming arena 4 is the menu arena
 
         if let Ok(projection) = camera_query.get_single() {
-            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].1;
+            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].2;
             let new_scale = if global_state.active_menu { 3.0 } else { 1.0 };
 
             // Set up animation for position and scale

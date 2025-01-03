@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::abilities::AbilitySpawner;
 use crate::interactions::KeyBindingsForAbility;
 use bevy::prelude::*;
@@ -8,7 +9,7 @@ pub enum CharacterTypeEnum {
     Mob,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub enum CharacterClassEnum {
     Alchemist,
     Bard,
@@ -19,6 +20,26 @@ pub enum CharacterClassEnum {
     Thief,
     Warrior,
     GuildMaster,
+    Menu
+}
+
+impl fmt::Display for CharacterClassEnum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let class_str = match self {
+            CharacterClassEnum::Alchemist => "Alchemist",
+            CharacterClassEnum::Bard => "Bard",
+            CharacterClassEnum::Cardinal => "Cardinal",
+            CharacterClassEnum::Forager => "Forager",
+            CharacterClassEnum::Merchant => "Merchant",
+            CharacterClassEnum::Hunter => "Hunter",
+            CharacterClassEnum::Thief => "Thief",
+            CharacterClassEnum::Warrior => "Warrior",
+            CharacterClassEnum::GuildMaster => "GuildMaster",
+            CharacterClassEnum::Menu => "---",
+
+        };
+        write!(f, "{}", class_str)
+    }
 }
 
 #[derive(Component)]

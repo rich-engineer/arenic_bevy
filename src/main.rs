@@ -8,6 +8,7 @@ mod interactions;
 mod state;
 mod tiles;
 mod title;
+mod huds;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
 use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
@@ -17,14 +18,29 @@ use global_chat::GlobalChatPlugin;
 use interactions::InteractionsPlugin;
 use tiles::TilesPlugin;
 use title::TitlePlugin;
+use huds::HudsPlugin;
 
+
+const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(DefaultPlugins
+            .set(ImagePlugin::default_nearest())
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Arenic".to_string(),
+                    resolution: RESOLUTION.into(),
+                    resizable: false,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        )
         .add_plugins(StatePlugin)
         .add_plugins(CamerasPlugin)
         .add_plugins(TitlePlugin)
         .add_plugins(AbilitiesPlugin)
+        .add_plugins(HudsPlugin)
         .add_plugins(TilesPlugin)
         .add_plugins(CharactersPlugin)
         .add_plugins(InteractionsPlugin)

@@ -2,7 +2,7 @@ use crate::characters::CharacterClassEnum;
 use bevy::app::App;
 use bevy::prelude::{Component, Plugin, Resource};
 
-#[derive(Hash, PartialEq, Eq)]
+#[derive(Hash, PartialEq, Eq, Debug)]
 pub enum ArenaEnum {
     Labyrinth,
     Sanctum,

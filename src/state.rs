@@ -13,7 +13,7 @@ impl Default for GlobalState {
     fn default() -> Self {
         Self {
             selected_character: None,
-            current_arena: 6,
+            current_arena: 2,
             active_menu: false
         }
     }
