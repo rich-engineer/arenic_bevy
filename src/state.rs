@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
 
+#[derive(Event)]
+pub struct SelectedArenaUpdatedEvent;
+
 #[derive(Resource)]
 pub struct GlobalState {
     pub selected_character: Option<Entity>,

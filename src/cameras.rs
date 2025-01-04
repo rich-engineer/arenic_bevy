@@ -1,5 +1,5 @@
 use crate::arenas::ArenaEnum;
-use crate::state::{GameState, GlobalState};
+use crate::state::{GameState, GlobalState, SelectedArenaUpdatedEvent};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use std::f32::consts::PI;
@@ -55,6 +55,7 @@ fn move_arenas_controls(
     arena_camera_positions: Res<ArenaCameraPositions>,
     mut camera_animation: ResMut<CameraAnimation>,
     camera_query: Query<&OrthographicProjection>,
+    mut event_writer: EventWriter<SelectedArenaUpdatedEvent>,
 ) {
     let total_arenas = arena_camera_positions.0.len() as u8;
 
@@ -75,6 +76,8 @@ fn move_arenas_controls(
             camera_animation.timer.reset();
             camera_animation.animating = true;
         }
+        // Emit the event so our UI update system can respond
+        event_writer.send(SelectedArenaUpdatedEvent);
     }
 
     // Handle Right Bracket ']' Press
@@ -94,6 +97,8 @@ fn move_arenas_controls(
             camera_animation.timer.reset();
             camera_animation.animating = true;
         }
+        // Emit the event so our UI update system can respond
+        event_writer.send(SelectedArenaUpdatedEvent);
     }
 
     // Handle 'P' Key Press for Toggling Menu and Animating
@@ -188,6 +193,7 @@ pub struct CamerasPlugin;
             app.init_resource::<ArenaCameraPositions>()
                 .init_resource::<CameraAnimation>()
                 .add_systems(Startup, setup_scene)
+                .add_event::<SelectedArenaUpdatedEvent>()
                 // Correct run_if syntax
                 .add_systems(
                     Update,

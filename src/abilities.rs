@@ -1,3 +1,5 @@
+mod hunter;
+
 use crate::characters::CharacterClassEnum;
 use bevy::prelude::*;
 

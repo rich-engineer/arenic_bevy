@@ -2,7 +2,7 @@ use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::prelude::*;
 use crate::cameras::ArenaCameraPositions;
 use crate::characters::CharacterClassEnum;
-use crate::state::GlobalState;
+use crate::state::{GlobalState, SelectedArenaUpdatedEvent};
 
 const TOP_BAR_HEIGHT: f32 = 36.0;
 const PROGRESS_BAR_HEIGHT: f32 = 8.0;
@@ -10,12 +10,17 @@ const SIDE_NAV_WIDTH: f32 = 40.0;
 const BOTTOM_NAV_HEIGHT: f32 = 93.0;
 const FONT_SIZE: f32 = 9.0;
 
+
+
 // Define UI component markers
 #[derive(Component)]
 struct TopNavigation;
 
 #[derive(Component)]
 struct BottomNavigation;
+
+#[derive(Component)]
+struct ArenaBossText;
 
 fn get_arena_name(
     arena_camera_position: &Res<ArenaCameraPositions>,
@@ -63,6 +68,7 @@ fn top_navigation(mut commands: Commands, asset_server: Res<AssetServer>, global
 fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
 
     parent.spawn((
+        ArenaBossText,
         Node {
             width: Val::Percent(100.0),
             display: Display::Flex,
@@ -80,7 +86,7 @@ fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
 }
 
 fn spawn_progress_bar(parent: &mut ChildBuilder) {
-    const boss_current_health: f32 = 90.0;
+    let boss_current_health: f32 = 90.0;
     parent
         .spawn((
             Node {
@@ -150,11 +156,34 @@ fn spawn_bottom_bar(commands: &mut Commands) {
     ));
 }
 
+fn update_arena_boss_text(
+    mut query: Query<&mut Text, With<ArenaBossText>>,
+    arena_camera_position: Res<ArenaCameraPositions>,
+    global_state: Res<GlobalState>,
+    mut event_reader: EventReader<SelectedArenaUpdatedEvent>,
+) {
+    // Only run if we've received an event
+    for _event in event_reader.read() {
+        let new_boss_name = get_arena_name(&arena_camera_position, &global_state);
+
+        for mut text in &mut query {
+            text.clear();
+            text.push_str(&new_boss_name);
+        }
+    }
+}
 
 pub struct HudsPlugin;
 
 impl Plugin for HudsPlugin {
     fn build (&self, app: &mut App) {
+
         app.add_systems(Startup, (top_navigation, spawn_bottom_navigation));
+
+
+        app.add_systems(
+            Update,
+            update_arena_boss_text
+        );
     }
 }
