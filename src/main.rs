@@ -19,7 +19,7 @@ use interactions::InteractionsPlugin;
 use tiles::TilesPlugin;
 use title::TitlePlugin;
 use huds::HudsPlugin;
-
+use crate::abilities::{Ability, AbilityName, DisplayAbility};
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
@@ -56,7 +56,7 @@ fn main() {
 fn start_game(mut commands: Commands, mut global_state: ResMut<GlobalState>) {
     let ability1 = AbilitySpawner::spawn_ability(
         &mut commands,
-        "Split Shot",
+        Ability::SplitShot.to_display_string(),
         "Next auto shot will fork",
         5.0,
         TargetTypeEnum::Directional,
@@ -65,7 +65,7 @@ fn start_game(mut commands: Commands, mut global_state: ResMut<GlobalState>) {
     );
     let ability2 = AbilitySpawner::spawn_ability(
         &mut commands,
-        "Auto Shot",
+        Ability::AutoShot.to_display_string(),
         "Automatically fires shots in the forward direction",
         1.0,
         TargetTypeEnum::Directional,
@@ -74,7 +74,7 @@ fn start_game(mut commands: Commands, mut global_state: ResMut<GlobalState>) {
     );
     let ability3 = AbilitySpawner::spawn_ability(
         &mut commands,
-        "Trap",
+        Ability::Trap.to_display_string(),
         "Places a trap on the grid that deals damage when an enemy steps on it.",
         1.0,
         TargetTypeEnum::Directional,
@@ -84,7 +84,7 @@ fn start_game(mut commands: Commands, mut global_state: ResMut<GlobalState>) {
 
     let ability4 = AbilitySpawner::spawn_ability(
         &mut commands,
-        "Snipe",
+        Ability::Snipe.to_display_string(),
         "Fires any distance always at the boss",
         4.0,
         TargetTypeEnum::BossTarget,

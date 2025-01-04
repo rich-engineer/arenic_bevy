@@ -119,6 +119,7 @@ fn move_arenas_controls(
             camera_animation.timer.reset();
             camera_animation.animating = true;
         }
+        event_writer.send(SelectedArenaUpdatedEvent);
     }
 }
 
