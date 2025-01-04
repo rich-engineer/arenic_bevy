@@ -105,10 +105,10 @@ fn move_arenas_controls(
     if keyboard_input.just_pressed(KeyCode::KeyP) {
         info!("P pressed");
         global_state.active_menu = !global_state.active_menu;
-        global_state.current_arena = 4; // Assuming arena 4 is the menu arena
+
 
         if let Ok(projection) = camera_query.get_single() {
-            let new_viewport_origin = arena_camera_positions.0[global_state.current_arena as usize].2;
+            let new_viewport_origin = arena_camera_positions.0[4].2;
             let new_scale = if global_state.active_menu { 3.0 } else { 1.0 };
 
             // Set up animation for position and scale
@@ -189,21 +189,21 @@ impl Default for CameraAnimation {
 
 pub struct CamerasPlugin;
 
-    impl Plugin for CamerasPlugin {
-        fn build(&self, app: &mut App) {
-            app.init_resource::<ArenaCameraPositions>()
-                .init_resource::<CameraAnimation>()
-                .add_systems(Startup, setup_scene)
-                .add_event::<SelectedArenaUpdatedEvent>()
-                // Correct run_if syntax
-                .add_systems(
-                    Update,
-                    (
-                        move_arenas_controls,
-                        animate_camera_viewport,
-                    )
-                        .chain()
-                        .run_if(in_state(GameState::Start))
-                );
-        }
+impl Plugin for CamerasPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<ArenaCameraPositions>()
+            .init_resource::<CameraAnimation>()
+            .add_systems(Startup, setup_scene)
+            .add_event::<SelectedArenaUpdatedEvent>()
+            // Correct run_if syntax
+            .add_systems(
+                Update,
+                (
+                    move_arenas_controls,
+                    animate_camera_viewport,
+                )
+                    .chain()
+                    .run_if(in_state(GameState::Start))
+            );
     }
+}

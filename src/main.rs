@@ -9,9 +9,9 @@ mod state;
 mod tiles;
 mod title;
 mod huds;
+use arenic::test_scenes::highlight_rect::HighlightRectPlugin;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
-use abilities::{AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
 use cameras::CamerasPlugin;
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
 use global_chat::GlobalChatPlugin;
@@ -19,7 +19,8 @@ use interactions::InteractionsPlugin;
 use tiles::TilesPlugin;
 use title::TitlePlugin;
 use huds::HudsPlugin;
-use crate::abilities::{Ability, AbilityName, DisplayAbility};
+use abilities::{Ability, DisplayAbility, AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
+
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
@@ -36,20 +37,21 @@ fn main() {
                 ..Default::default()
             })
         )
-        .add_plugins(StatePlugin)
-        .add_plugins(CamerasPlugin)
-        .add_plugins(TitlePlugin)
-        .add_plugins(AbilitiesPlugin)
-        .add_plugins(HudsPlugin)
-        .add_plugins(TilesPlugin)
-        .add_plugins(CharactersPlugin)
-        .add_plugins(InteractionsPlugin)
-        .add_plugins(GlobalChatPlugin)
-        .add_systems(Startup, start_game)
-        .add_systems(
-            Update,
-            spawn_selected_character.run_if(in_state(GameState::Start)),
-        )
+        // .add_plugins(StatePlugin)
+        // .add_plugins(CamerasPlugin)
+        // .add_plugins(TitlePlugin)
+        // .add_plugins(AbilitiesPlugin)
+        // .add_plugins(HudsPlugin)
+        // .add_plugins(TilesPlugin)
+        // .add_plugins(CharactersPlugin)
+        // .add_plugins(InteractionsPlugin)
+        // .add_plugins(GlobalChatPlugin)
+        // .add_systems(Startup, start_game)
+        .add_plugins(HighlightRectPlugin)
+        // .add_systems(
+        //     Update,
+        //     spawn_selected_character.run_if(in_state(GameState::Start)),
+        // )
         .run();
 }
 
