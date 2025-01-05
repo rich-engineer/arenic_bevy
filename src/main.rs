@@ -1,24 +1,18 @@
 use bevy::prelude::*;
 mod abilities;
 mod arenas;
-mod cameras;
 mod characters;
 mod global_chat;
 mod interactions;
 mod state;
-mod tiles;
 mod title;
-mod huds;
 mod highlight_rect;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
-use cameras::CamerasPlugin;
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
 use global_chat::GlobalChatPlugin;
 use interactions::InteractionsPlugin;
-use tiles::TilesPlugin;
 use title::TitlePlugin;
-use huds::HudsPlugin;
 use abilities::{Ability, DisplayAbility, AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
 use crate::highlight_rect::HighlightRectPlugin;
 
@@ -38,11 +32,11 @@ fn main() {
             })
         )
         .add_plugins(StatePlugin)
-        // .add_plugins(CamerasPlugin)
-        // .add_plugins(TitlePlugin)
+
+        .add_plugins(TitlePlugin)
         // .add_plugins(AbilitiesPlugin)
-        // .add_plugins(HudsPlugin)
-        // .add_plugins(TilesPlugin)
+
+
         // .add_plugins(CharactersPlugin)
         // .add_plugins(InteractionsPlugin)
         // .add_plugins(GlobalChatPlugin)

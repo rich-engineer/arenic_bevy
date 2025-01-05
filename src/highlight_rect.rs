@@ -1,9 +1,7 @@
 use bevy::color::palettes::tailwind::{GRAY_400, GRAY_950, RED_200, RED_400};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
-use crate::cameras::ArenaCameraPositions;
-use crate::characters::CharacterClassEnum;
-use crate::state::{GlobalState, SelectedArenaUpdatedEvent};
+use crate::state::{GlobalState};
 
 pub struct HighlightRectPlugin;
 
@@ -23,10 +21,8 @@ impl Plugin for HighlightRectPlugin {
 pub struct ArenasParentTransform;
 #[derive(Component)]
 pub struct ArenaBossText;
-const TOP_BAR_HEIGHT: f32 = 36.0;
+
 const PROGRESS_BAR_HEIGHT: f32 = 8.0;
-const SIDE_NAV_WIDTH: f32 = 40.0;
-const BOTTOM_NAV_HEIGHT: f32 = 93.0;
 const FONT_SIZE: f32 = 9.0;
 
 // Magic number just get over it;

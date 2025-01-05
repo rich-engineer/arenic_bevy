@@ -123,7 +123,7 @@ fn start_button_system(
             Interaction::Pressed => {
                 *color = BackgroundColor(Color::Srgba(GRAY_200));
                 commands.entity(*window).insert(cursor_icons.0[1].clone());
-                next_state.set(GameState::Start)
+                // next_state.set(GameState::Start)
             }
             Interaction::Hovered => {
                 *color = BackgroundColor(Color::Srgba(GRAY_100));
