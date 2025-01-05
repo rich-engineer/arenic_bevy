@@ -1,4 +1,4 @@
-use bevy::color::palettes::tailwind::{GRAY_400, GRAY_950, RED_200, RED_400};
+use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use crate::state::{GlobalState};
@@ -66,7 +66,7 @@ pub fn camera_setup(mut commands: Commands, global_state: Res<GlobalState>) {
     commands.spawn((
         Camera2d,
         Camera {
-            clear_color: ClearColorConfig::Custom(Color::from(RED_200)),
+            clear_color: ClearColorConfig::Custom(Color::from(GRAY_50)),
             ..Default::default()
         },
         OrthographicProjection {

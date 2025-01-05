@@ -7,6 +7,7 @@ mod interactions;
 mod state;
 mod title;
 mod highlight_rect;
+mod metadata;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
