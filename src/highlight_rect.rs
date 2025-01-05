@@ -216,12 +216,13 @@ pub fn setup_tiles(mut commands: &mut ChildBuilder, texture: Handle<Image>) {
 
 fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
     if(state.active_menu == false) { return; }
+    let current_arena_index = state.current_arena as usize;
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
     for i in 0..3 {
         let pos = Vec2::new(
-            total_width * OFFSET_MATRIX[0].x + i as f32,
-            total_height * OFFSET_MATRIX[0].y - (MENU_Y_OFFSET / 2.0) -  i as f32, // Magic number again >_>
+            total_width * OFFSET_MATRIX[current_arena_index].x + i as f32,
+            total_height * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) -  i as f32,
         );
         gizmos.rect_2d(
             pos,
@@ -232,13 +233,11 @@ fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
 }
 
 fn handle_camera_input(mut global_state: ResMut<GlobalState>, keyboard_input: Res<ButtonInput<KeyCode>>) {
-    if(global_state.active_menu == false) {
-        if keyboard_input.just_pressed(KeyCode::BracketLeft) {
-            global_state.current_arena = (global_state.current_arena + 9 - 1) % 9;
-        }
-        if keyboard_input.just_pressed(KeyCode::BracketRight) {
-            global_state.current_arena = (global_state.current_arena + 1) % 9;
-        }
+    if keyboard_input.just_pressed(KeyCode::BracketLeft) {
+        global_state.current_arena = (global_state.current_arena + 9 - 1) % 9;
+    }
+    if keyboard_input.just_pressed(KeyCode::BracketRight) {
+        global_state.current_arena = (global_state.current_arena + 1) % 9;
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyP) {
