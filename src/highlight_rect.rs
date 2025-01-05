@@ -1,25 +1,58 @@
-use bevy::color::palettes::tailwind::{ RED_200};
+use bevy::color::palettes::tailwind::{GRAY_400, GRAY_950, RED_200, RED_400};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
-use crate::state::{GlobalState};
+use crate::cameras::ArenaCameraPositions;
+use crate::characters::CharacterClassEnum;
+use crate::state::{GlobalState, SelectedArenaUpdatedEvent};
 
 pub struct HighlightRectPlugin;
 
 impl Plugin for HighlightRectPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, camera_setup);
-        app.add_systems(Startup, create_ui);
-        app.add_systems(Startup, (setup_all_arenas));
+        app.add_systems(Startup, (camera_setup, create_ui, setup_all_arenas));
         app.add_systems(Update, (
             handle_camera_input,
             highlight_arena_system,
-            update_camera.after(handle_camera_input)
+            update_arena_boss_text,
+            update_camera.after(handle_camera_input),
+
         ));
     }
 }
 #[derive(Component)]
 pub struct ArenasParentTransform;
+#[derive(Component)]
+pub struct ArenaBossText;
+const TOP_BAR_HEIGHT: f32 = 36.0;
+const PROGRESS_BAR_HEIGHT: f32 = 8.0;
+const SIDE_NAV_WIDTH: f32 = 40.0;
+const BOTTOM_NAV_HEIGHT: f32 = 93.0;
+const FONT_SIZE: f32 = 9.0;
 
+// Magic number just get over it;
+const MENU_Y_OFFSET: f32 = -53.0;
+const TOTAL_ARENAS_LENGTH: usize = 9;
+const MENU_SCALE: f32 = 3.0;
+const MENU_POS: Vec3 =  Vec3::new(
+    0.0,
+    MENU_Y_OFFSET,
+    0.0
+);
+const GAME_SCALE: f32 = 1.0;
+const GRID_WIDTH: usize = 65;
+const GRID_HEIGHT: usize = 31;
+const TILE_SIZE: f32 = 19.0;
+const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
+    Vec2::new(-1.0, 1.0), // 0
+    Vec2::new(0.0, 1.0), // 1
+    Vec2::new(1.0, 1.0), // 2
+    Vec2::new(-1.0, 0.0), // 3
+    Vec2::new(0.0, 0.0), // 4
+    Vec2::new(1.0, 0.0), // 5
+    Vec2::new(-1.0, -1.0), // 6
+    Vec2::new(0.0, -1.0), // 7
+    Vec2::new(1.0, -1.0), // 8
+];
 
 fn get_current_arena_pos(global_state: &Res<GlobalState>) -> Vec3 {
     let current_arena = global_state.current_arena as usize;
@@ -58,7 +91,9 @@ pub fn camera_setup(mut commands: Commands, global_state: Res<GlobalState>) {
     ));
 }
 
-fn create_ui(mut commands: Commands) {
+fn create_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font = asset_server.load("fonts/DMSans-Black.ttf");
+    // let name = get_arena_name(&state);
     commands.spawn((
         Node {
             position_type: PositionType::Relative,
@@ -68,12 +103,49 @@ fn create_ui(mut commands: Commands) {
             height: Val::Percent(100.0),
             ..default()
         },
-    )).with_children(create_top_navigation)
+    ))
+        .with_children(|parent| create_top_navigation(parent, "Hunter", font))
+
       .with_children(create_inner_container)
       .with_children(create_bottom_bar);
 }
+fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
+    parent.spawn((
+        ArenaBossText,
+        Node {
+            margin: UiRect {
+                left: Val::Px(PROGRESS_BAR_HEIGHT * 3.0),
+                right: Default::default(),
+                top: Val::Px(PROGRESS_BAR_HEIGHT * 2.0),
+                bottom: Default::default(),
+            },
+            width: Val::Percent(100.0),
+            display: Display::Flex,
+            ..default()
+        },
+        Text::new(text),
+        TextFont {
+            font,
+            font_size: FONT_SIZE,
+            ..default()
+        },
+        TextColor(Color::Srgba(GRAY_950)),
+        TextLayout::new_with_justify(JustifyText::Left),
+    ));
+}
 
-fn create_top_navigation(mut commands: &mut ChildBuilder) {
+fn update_arena_boss_text(
+    mut query: Query<&mut Text, With<ArenaBossText>>,
+    state: Res<GlobalState>,
+) {
+    let new_boss_name = get_arena_name(&state);
+
+    for mut text in &mut query {
+        text.clear();
+        text.push_str(&new_boss_name);
+    }
+}
+fn create_top_navigation(mut commands: &mut ChildBuilder, text: &str, font: Handle<Font>) {
     let top_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands.spawn((
        Node {
@@ -83,7 +155,35 @@ fn create_top_navigation(mut commands: &mut ChildBuilder) {
            ..default()
        },
        BackgroundColor(top_bar_color),
-    ));
+    ))
+        .with_children(spawn_progress_bar)
+        .with_children(|parent| spawn_arena_boss(parent, text, font));
+}
+fn spawn_progress_bar(parent: &mut ChildBuilder) {
+    let boss_current_health: f32 = 90.0;
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(0.0),
+                height: Val::Px(PROGRESS_BAR_HEIGHT),
+                width: Val::Percent(100.0),
+                ..default()
+            },
+            BackgroundColor(Color::Srgba(GRAY_400)),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(0.0),
+                    height: Val::Px(PROGRESS_BAR_HEIGHT),
+                    width: Val::Percent(boss_current_health),
+                    ..default()
+                },
+                BackgroundColor(Color::Srgba(RED_400)),
+            ));
+        });
 }
 fn create_inner_container(mut commands: &mut ChildBuilder) {
     // no color, it only for spacing
@@ -134,30 +234,7 @@ fn create_bottom_bar(mut commands: &mut ChildBuilder) {
 }
 
 
-// Magic number just get over it;
-const MENU_Y_OFFSET: f32 = -53.0;
-const TOTAL_ARENAS_LENGTH: usize = 9;
-const MENU_SCALE: f32 = 3.0;
-const MENU_POS: Vec3 =  Vec3::new(
-    0.0,
-    MENU_Y_OFFSET,
-    0.0
-);
-const GAME_SCALE: f32 = 1.0;
-const GRID_WIDTH: usize = 65;
-const GRID_HEIGHT: usize = 31;
-const TILE_SIZE: f32 = 19.0;
-const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
-    Vec2::new(-1.0, 1.0), // 0
-    Vec2::new(0.0, 1.0), // 1
-    Vec2::new(1.0, 1.0), // 2
-    Vec2::new(-1.0, 0.0), // 3
-    Vec2::new(0.0, 0.0), // 4
-    Vec2::new(1.0, 0.0), // 5
-    Vec2::new(-1.0, -1.0), // 6
-    Vec2::new(0.0, -1.0), // 7
-    Vec2::new(1.0, -1.0), // 8
-];
+
 pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) {
 
     commands
@@ -215,7 +292,7 @@ pub fn setup_tiles(mut commands: &mut ChildBuilder, texture: Handle<Image>) {
 }
 
 fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
-    if(state.active_menu == false) { return; }
+    if state.active_menu == false { return; }
     let current_arena_index = state.current_arena as usize;
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -259,4 +336,26 @@ fn update_camera(
 
     projection.scale = scale;
     transform.translation = position;
+}
+
+fn get_arena_name(
+    state: &Res<GlobalState>,
+) -> String {
+    let current_arena= state.current_arena;
+
+    let name = match current_arena {
+        0 => "Hunter",
+        1 => "Guild Master",
+        2 => "Cardinal",
+        3 => "Forager",
+        4 => "Warrior",
+        5 => "Thief",
+        6 => "Alchemist",
+        7 => "Merchant",
+        8 => "Bard",
+        _ => "---",
+    };
+
+    name.to_uppercase()
+
 }
