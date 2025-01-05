@@ -9,7 +9,7 @@ mod state;
 mod tiles;
 mod title;
 mod huds;
-use arenic::test_scenes::highlight_rect::HighlightRectPlugin;
+mod highlight_rect;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
 use cameras::CamerasPlugin;
@@ -20,7 +20,7 @@ use tiles::TilesPlugin;
 use title::TitlePlugin;
 use huds::HudsPlugin;
 use abilities::{Ability, DisplayAbility, AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
-
+use crate::highlight_rect::HighlightRectPlugin;
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
@@ -37,7 +37,7 @@ fn main() {
                 ..Default::default()
             })
         )
-        // .add_plugins(StatePlugin)
+        .add_plugins(StatePlugin)
         // .add_plugins(CamerasPlugin)
         // .add_plugins(TitlePlugin)
         // .add_plugins(AbilitiesPlugin)
