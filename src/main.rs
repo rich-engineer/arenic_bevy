@@ -31,7 +31,7 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Arenic".to_string(),
                     resolution: RESOLUTION.into(),
-                    resizable: false,
+                    // resizable: false,
                     ..Default::default()
                 }),
                 ..Default::default()
