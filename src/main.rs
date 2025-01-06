@@ -1,38 +1,39 @@
 use bevy::prelude::*;
 mod abilities;
 mod arenas;
+mod cameras;
 mod characters;
+mod constants;
 mod global_chat;
+mod hud;
 mod interactions;
+mod shared_traits;
 mod state;
 mod title;
-mod shared_traits;
-mod cameras;
-mod constants;
-mod hud;
 
-use state::{StatePlugin};
-use title::TitlePlugin;
+use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;
 use cameras::CamerasPlugin;
-use abilities::AbilitiesPlugin;
 use characters::CharactersPlugin;
 use hud::HUDPlugin;
+use state::StatePlugin;
+use title::TitlePlugin;
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins
-            .set(ImagePlugin::default_nearest())
-            .set(WindowPlugin {
-                primary_window: Some(Window {
-                    title: "Arenic".to_string(),
-                    resolution: RESOLUTION.into(),
-                    resizable: false,
+        .add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Arenic".to_string(),
+                        resolution: RESOLUTION.into(),
+                        resizable: false,
+                        ..Default::default()
+                    }),
                     ..Default::default()
                 }),
-                ..Default::default()
-            })
         )
         .add_plugins(StatePlugin)
         .add_plugins(CamerasPlugin)
@@ -43,4 +44,3 @@ fn main() {
         .add_plugins(CharactersPlugin)
         .run();
 }
-

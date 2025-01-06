@@ -1,7 +1,6 @@
-
 use crate::characters::CharacterClassEnum;
-use bevy::prelude::*;
 use crate::shared_traits::EnumDisplay;
+use bevy::prelude::*;
 
 #[allow(dead_code)]
 pub enum AbilityNameEnum {
@@ -103,8 +102,8 @@ impl EnumDisplay for AbilityNameEnum {
             AbilityNameEnum::Dance => "Dance",
             AbilityNameEnum::Helix => "Helix",
             AbilityNameEnum::Mimic => "Mimic",
-
-        }.to_string()
+        }
+        .to_string()
     }
 }
 

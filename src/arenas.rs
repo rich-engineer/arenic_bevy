@@ -1,10 +1,10 @@
-use bevy::prelude::*;
 use crate::characters::CharacterClassEnum;
-use crate::constants::{GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH};
+use crate::constants::{
+    GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH,
+};
 use crate::shared_traits::EnumDisplay;
 use crate::state::GlobalState;
-
-
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Arena {
@@ -18,7 +18,6 @@ pub struct ArenaBossText;
 #[derive(Component)]
 pub struct ArenaName(pub String);
 
-
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ArenaNameEnum {
     Labyrinth,
@@ -30,7 +29,7 @@ pub enum ArenaNameEnum {
     Casino,
     Gala,
     GuildHouse,
-    Menu
+    Menu,
 }
 
 impl EnumDisplay for ArenaNameEnum {
@@ -47,7 +46,8 @@ impl EnumDisplay for ArenaNameEnum {
             ArenaNameEnum::Gala => "Gala",
             ArenaNameEnum::GuildHouse => "Guild House",
             ArenaNameEnum::Menu => "---",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 
@@ -58,7 +58,10 @@ fn update_arena_boss_text(
 ) {
     let current_arena_id = state.current_arena;
 
-    if let Some((_, arena_name)) = arenas.iter().find(|(arena, _)| arena.id == current_arena_id) {
+    if let Some((_, arena_name)) = arenas
+        .iter()
+        .find(|(arena, _)| arena.id == current_arena_id)
+    {
         for mut text in &mut query {
             text.clear();
             text.push_str(&arena_name.0);
@@ -67,14 +70,16 @@ fn update_arena_boss_text(
 }
 
 fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
-    if state.active_menu == false { return; }
+    if state.active_menu == false {
+        return;
+    }
     let current_arena_index = state.current_arena as usize;
     let total_width = GRID_WIDTH as f32 * TILE_SIZE;
     let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
     for i in 0..3 {
         let pos = Vec2::new(
             total_width * OFFSET_MATRIX[current_arena_index].x + i as f32,
-            total_height * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) -  i as f32,
+            total_height * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) - i as f32,
         );
         gizmos.rect_2d(
             pos,
@@ -84,10 +89,8 @@ fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
     }
 }
 
-pub fn get_arena_boss_name(
-    state: &Res<GlobalState>,
-) -> String {
-    let current_arena= state.current_arena;
+pub fn get_arena_boss_name(state: &Res<GlobalState>) -> String {
+    let current_arena = state.current_arena;
 
     match current_arena {
         0 => CharacterClassEnum::Hunter,
@@ -100,7 +103,9 @@ pub fn get_arena_boss_name(
         7 => CharacterClassEnum::Merchant,
         8 => CharacterClassEnum::Bard,
         _ => CharacterClassEnum::Menu,
-    }.to_display_string().to_uppercase()
+    }
+    .to_display_string()
+    .to_uppercase()
 }
 
 pub fn get_arena_name_for_id(arena_id: u8) -> String {
@@ -115,10 +120,12 @@ pub fn get_arena_name_for_id(arena_id: u8) -> String {
         7 => ArenaNameEnum::Casino,
         8 => ArenaNameEnum::Gala,
         _ => ArenaNameEnum::Menu,
-    }.to_display_string().to_uppercase()
+    }
+    .to_display_string()
+    .to_uppercase()
 }
 
-pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) {
+pub fn setup_all_arenas(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             ArenasParentTransform,
@@ -127,7 +134,7 @@ pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) 
             GlobalTransform::default(),
         ))
         .with_children(|arena| {
-            for i in 0..TOTAL_ARENAS_LENGTH  {
+            for i in 0..TOTAL_ARENAS_LENGTH {
                 let arena_id = i as u8;
                 let total_width = GRID_WIDTH as f32 * TILE_SIZE;
                 let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
@@ -144,7 +151,6 @@ pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) 
                     8 => asset_server.load("UI/bard_tile.png"),
                     _ => asset_server.load("UI/default_tile.png"),
                 };
-
 
                 let start_x = -(total_width / 2.0) + (TILE_SIZE / 2.0) + (total_width * offset.x);
                 let start_y = (total_height / 2.0) + (TILE_SIZE - 1.0) + (total_height * offset.y);
@@ -168,7 +174,7 @@ pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
     for col in 0..GRID_WIDTH {
         for row in 0..GRID_HEIGHT {
             let x = col as f32 * TILE_SIZE;
-            let y = - (row as f32 * TILE_SIZE);
+            let y = -(row as f32 * TILE_SIZE);
             commands.spawn((
                 Sprite {
                     custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
@@ -178,7 +184,6 @@ pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
                 Transform::from_xyz(x, y, 0.0),
             ));
         }
-
     }
 }
 

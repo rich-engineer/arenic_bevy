@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::arenas::ArenaNameEnum;
+use bevy::prelude::*;
 
 #[derive(Resource)]
 pub struct GlobalState {
@@ -8,13 +8,12 @@ pub struct GlobalState {
     pub active_menu: bool,
 }
 
-
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
             // selected_character: None,
             current_arena: 0,
-            active_menu: false
+            active_menu: false,
         }
     }
 }
@@ -23,8 +22,7 @@ pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<GlobalState>()
-            .init_state::<GameState>();
+        app.init_resource::<GlobalState>().init_state::<GameState>();
     }
 }
 
