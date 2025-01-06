@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::arenas::ArenaNameEnum;
 
 #[derive(Resource)]
 pub struct GlobalState {
@@ -30,11 +31,13 @@ impl Plugin for StatePlugin {
 #[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
 #[allow(dead_code)]
 pub enum GameState {
-
-    Title,
-    Start,
-
-    GuildHouse,
     #[default]
-    HighlightRect,
+    Title,
+    Menu,
+    Arena(ArenaNameEnum),
+    Rotate,
+    Roster,
+    Gacha,
+    AuctionHouse,
+    CraftWorkshop,
 }

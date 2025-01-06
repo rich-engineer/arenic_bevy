@@ -19,6 +19,7 @@ pub struct ArenaBossText;
 pub struct ArenaName(pub String);
 
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ArenaNameEnum {
     Labyrinth,
     Sanctum,
