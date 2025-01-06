@@ -8,14 +8,16 @@ mod state;
 mod title;
 mod highlight_rect;
 mod metadata;
+mod shared_traits;
 
 use crate::state::{GameState, GlobalState, StatePlugin};
 use characters::{CharacterClassEnum, CharacterSpawner, CharacterTypeEnum, CharactersPlugin};
 use global_chat::GlobalChatPlugin;
 use interactions::InteractionsPlugin;
 use title::TitlePlugin;
-use abilities::{Ability, DisplayAbility, AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
-use crate::highlight_rect::HighlightRectPlugin;
+use abilities::{Ability, AbilitiesPlugin, AbilitySpawner, CastTypeEnum, TargetTypeEnum};
+use highlight_rect::HighlightRectPlugin;
+use shared_traits::EnumDisplay;
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {

@@ -1,6 +1,9 @@
 use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
+use crate::arenas::{ArenaNameEnum};
+use crate::characters::CharacterClassEnum;
+use crate::shared_traits::EnumDisplay;
 use crate::state::{GlobalState};
 
 pub struct HighlightRectPlugin;
@@ -17,10 +20,18 @@ impl Plugin for HighlightRectPlugin {
         ));
     }
 }
+
+#[derive(Component)]
+pub struct Arena {
+    pub id: u8,
+}
 #[derive(Component)]
 pub struct ArenasParentTransform;
 #[derive(Component)]
 pub struct ArenaBossText;
+
+#[derive(Component)]
+pub struct ArenaName(pub String);
 
 const PROGRESS_BAR_HEIGHT: f32 = 8.0;
 const FONT_SIZE: f32 = 9.0;
@@ -132,13 +143,16 @@ fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
 
 fn update_arena_boss_text(
     mut query: Query<&mut Text, With<ArenaBossText>>,
+    arenas: Query<(&Arena, &ArenaName)>,
     state: Res<GlobalState>,
 ) {
-    let new_boss_name = get_arena_name(&state);
+    let current_arena_id = state.current_arena;
 
-    for mut text in &mut query {
-        text.clear();
-        text.push_str(&new_boss_name);
+    if let Some((_, arena_name)) = arenas.iter().find(|(arena, _)| arena.id == current_arena_id) {
+        for mut text in &mut query {
+            text.clear();
+            text.push_str(&arena_name.0);
+        }
     }
 }
 fn create_top_navigation(mut commands: &mut ChildBuilder, text: &str, font: Handle<Font>) {
@@ -238,11 +252,14 @@ pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) 
             ArenasParentTransform,
             Transform::from_xyz(0.0, 0.0, 0.0),
             InheritedVisibility::default(),
+            GlobalTransform::default(),
         ))
         .with_children(|arena| {
-            for (i, offset) in OFFSET_MATRIX.iter().enumerate() {
+            for i in 0..TOTAL_ARENAS_LENGTH  {
+                let arena_id = i as u8;
                 let total_width = GRID_WIDTH as f32 * TILE_SIZE;
                 let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
+                let offset = OFFSET_MATRIX[i];
                 let texture = match i {
                     0 => asset_server.load("UI/hunter_tile.png"),
                     1 => asset_server.load("UI/guild_tile.png"),
@@ -262,12 +279,31 @@ pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) 
 
                 arena
                     .spawn((
+                        Arena { id: arena_id },
+                        ArenaName(get_arena_name_for_id(arena_id)),
+                        // ArenaBosses,
+                        // ArenaHeroes,
                         Transform::from_xyz(start_x, start_y, 0.0),
                         InheritedVisibility::default(),
+                        GlobalTransform::default(),
                     ))
                     .with_children(|parent| setup_tiles(parent, texture));
             }
         });
+}
+fn get_arena_name_for_id(arena_id: u8) -> String {
+    match arena_id {
+        0 => ArenaNameEnum::Labyrinth,
+        1 => ArenaNameEnum::GuildHouse,
+        2 => ArenaNameEnum::Sanctum,
+        3 => ArenaNameEnum::Mountain,
+        4 => ArenaNameEnum::Bastion,
+        5 => ArenaNameEnum::Pawnshop,
+        6 => ArenaNameEnum::Crucible,
+        7 => ArenaNameEnum::Casino,
+        8 => ArenaNameEnum::Gala,
+        _ => ArenaNameEnum::Menu,
+    }.to_display_string().to_uppercase()
 }
 pub fn setup_tiles(mut commands: &mut ChildBuilder, texture: Handle<Image>) {
     for col in 0..GRID_WIDTH {
@@ -339,19 +375,16 @@ fn get_arena_name(
 ) -> String {
     let current_arena= state.current_arena;
 
-    let name = match current_arena {
-        0 => "Hunter",
-        1 => "Guild Master",
-        2 => "Cardinal",
-        3 => "Forager",
-        4 => "Warrior",
-        5 => "Thief",
-        6 => "Alchemist",
-        7 => "Merchant",
-        8 => "Bard",
-        _ => "---",
-    };
-
-    name.to_uppercase()
-
+    match current_arena {
+        0 => CharacterClassEnum::Hunter,
+        1 => CharacterClassEnum::GuildMaster,
+        2 => CharacterClassEnum::Cardinal,
+        3 => CharacterClassEnum::Forager,
+        4 => CharacterClassEnum::Warrior,
+        5 => CharacterClassEnum::Thief,
+        6 => CharacterClassEnum::Alchemist,
+        7 => CharacterClassEnum::Merchant,
+        8 => CharacterClassEnum::Bard,
+        _ => CharacterClassEnum::Menu,
+    }.to_display_string().to_uppercase()
 }

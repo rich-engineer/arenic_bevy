@@ -1,11 +1,7 @@
 
 use crate::characters::CharacterClassEnum;
 use bevy::prelude::*;
-
-
-pub trait DisplayAbility {
-    fn to_display_string(&self) -> String;
-}
+use crate::shared_traits::EnumDisplay;
 
 pub enum Ability {
     // 1 Hunter abilities
@@ -57,7 +53,7 @@ pub enum Ability {
     Mimic,
 }
 
-impl DisplayAbility for Ability {
+impl EnumDisplay for Ability {
     fn to_display_string(&self) -> String {
         match self {
             // Hunter abilities
