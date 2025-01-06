@@ -12,6 +12,7 @@ pub enum CharacterTypeEnum {
 
 
 #[derive(PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum CharacterClassEnum {
     Alchemist,
     Bard,

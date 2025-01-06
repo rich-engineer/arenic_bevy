@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::constants::{GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
+use crate::characters::CharacterClassEnum;
+use crate::constants::{GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH};
 use crate::shared_traits::EnumDisplay;
 use crate::state::GlobalState;
 
@@ -82,13 +83,109 @@ fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
     }
 }
 
+pub fn get_arena_boss_name(
+    state: &Res<GlobalState>,
+) -> String {
+    let current_arena= state.current_arena;
+
+    match current_arena {
+        0 => CharacterClassEnum::Hunter,
+        1 => CharacterClassEnum::GuildMaster,
+        2 => CharacterClassEnum::Cardinal,
+        3 => CharacterClassEnum::Forager,
+        4 => CharacterClassEnum::Warrior,
+        5 => CharacterClassEnum::Thief,
+        6 => CharacterClassEnum::Alchemist,
+        7 => CharacterClassEnum::Merchant,
+        8 => CharacterClassEnum::Bard,
+        _ => CharacterClassEnum::Menu,
+    }.to_display_string().to_uppercase()
+}
+
+pub fn get_arena_name_for_id(arena_id: u8) -> String {
+    match arena_id {
+        0 => ArenaNameEnum::Labyrinth,
+        1 => ArenaNameEnum::GuildHouse,
+        2 => ArenaNameEnum::Sanctum,
+        3 => ArenaNameEnum::Mountain,
+        4 => ArenaNameEnum::Bastion,
+        5 => ArenaNameEnum::Pawnshop,
+        6 => ArenaNameEnum::Crucible,
+        7 => ArenaNameEnum::Casino,
+        8 => ArenaNameEnum::Gala,
+        _ => ArenaNameEnum::Menu,
+    }.to_display_string().to_uppercase()
+}
+
+pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) {
+    commands
+        .spawn((
+            ArenasParentTransform,
+            Transform::from_xyz(0.0, 0.0, 0.0),
+            InheritedVisibility::default(),
+            GlobalTransform::default(),
+        ))
+        .with_children(|arena| {
+            for i in 0..TOTAL_ARENAS_LENGTH  {
+                let arena_id = i as u8;
+                let total_width = GRID_WIDTH as f32 * TILE_SIZE;
+                let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
+                let offset = OFFSET_MATRIX[i];
+                let texture = match i {
+                    0 => asset_server.load("UI/hunter_tile.png"),
+                    1 => asset_server.load("UI/guild_tile.png"),
+                    2 => asset_server.load("UI/cardinal_tile.png"),
+                    3 => asset_server.load("UI/forager_tile.png"),
+                    4 => asset_server.load("UI/warrior_tile.png"),
+                    5 => asset_server.load("UI/thief_tile.png"),
+                    6 => asset_server.load("UI/alchemist_tile.png"),
+                    7 => asset_server.load("UI/merchant_tile.png"),
+                    8 => asset_server.load("UI/bard_tile.png"),
+                    _ => asset_server.load("UI/default_tile.png"),
+                };
 
 
+                let start_x = -(total_width / 2.0) + (TILE_SIZE / 2.0) + (total_width * offset.x);
+                let start_y = (total_height / 2.0) + (TILE_SIZE - 1.0) + (total_height * offset.y);
+
+                arena
+                    .spawn((
+                        Arena { id: arena_id },
+                        ArenaName(get_arena_name_for_id(arena_id)),
+                        // ArenaBosses,
+                        // ArenaHeroes,
+                        Transform::from_xyz(start_x, start_y, 0.0),
+                        InheritedVisibility::default(),
+                        GlobalTransform::default(),
+                    ))
+                    .with_children(|parent| setup_tiles(parent, texture));
+            }
+        });
+}
+
+pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
+    for col in 0..GRID_WIDTH {
+        for row in 0..GRID_HEIGHT {
+            let x = col as f32 * TILE_SIZE;
+            let y = - (row as f32 * TILE_SIZE);
+            commands.spawn((
+                Sprite {
+                    custom_size: Some(Vec2::new(TILE_SIZE, TILE_SIZE)),
+                    image: texture.clone(),
+                    ..default()
+                },
+                Transform::from_xyz(x, y, 0.0),
+            ));
+        }
+
+    }
+}
 
 pub struct ArenaPlugin;
 
 impl Plugin for ArenaPlugin {
     fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_all_arenas);
         app.add_systems(Update, (update_arena_boss_text, highlight_arena_system));
     }
 }

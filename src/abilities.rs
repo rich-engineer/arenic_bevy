@@ -3,7 +3,8 @@ use crate::characters::CharacterClassEnum;
 use bevy::prelude::*;
 use crate::shared_traits::EnumDisplay;
 
-pub enum Ability {
+#[allow(dead_code)]
+pub enum AbilityNameEnum {
     // 1 Hunter abilities
     SplitShot,
     AutoShot,
@@ -53,55 +54,55 @@ pub enum Ability {
     Mimic,
 }
 
-impl EnumDisplay for Ability {
+impl EnumDisplay for AbilityNameEnum {
     fn to_display_string(&self) -> String {
         match self {
             // Hunter abilities
-            Ability::SplitShot => "Split Shot",
-            Ability::AutoShot => "Auto Shot",
-            Ability::Trap => "Trap",
-            Ability::Snipe => "Snipe",
+            AbilityNameEnum::SplitShot => "Split Shot",
+            AbilityNameEnum::AutoShot => "Auto Shot",
+            AbilityNameEnum::Trap => "Trap",
+            AbilityNameEnum::Snipe => "Snipe",
 
             // Warrior abilities
-            Ability::Block => "Block",
-            Ability::Bash => "Bash",
-            Ability::Taunt => "Taunt",
-            Ability::Bulwark => "Bulwark",
+            AbilityNameEnum::Block => "Block",
+            AbilityNameEnum::Bash => "Bash",
+            AbilityNameEnum::Taunt => "Taunt",
+            AbilityNameEnum::Bulwark => "Bulwark",
 
             // Alchemist abilities
-            Ability::Ironskin => "Iron skin",
-            Ability::Acid => "Acid",
-            Ability::Transmute => "Transmute",
-            Ability::Siphon => "Siphon",
+            AbilityNameEnum::Ironskin => "Iron skin",
+            AbilityNameEnum::Acid => "Acid",
+            AbilityNameEnum::Transmute => "Transmute",
+            AbilityNameEnum::Siphon => "Siphon",
 
             // Gatherer abilities
-            Ability::Border => "Border",
-            Ability::Bolder => "Bolder",
-            Ability::Dig => "Dig",
-            Ability::Mushroom => "Mushroom",
+            AbilityNameEnum::Border => "Border",
+            AbilityNameEnum::Bolder => "Bolder",
+            AbilityNameEnum::Dig => "Dig",
+            AbilityNameEnum::Mushroom => "Mushroom",
 
             // Cardinal
-            Ability::Barrier => "Barrier",
-            Ability::Beam => "Beam",
-            Ability::Heal => "Heal",
-            Ability::Resurrect => "Resurrect",
+            AbilityNameEnum::Barrier => "Barrier",
+            AbilityNameEnum::Beam => "Beam",
+            AbilityNameEnum::Heal => "Heal",
+            AbilityNameEnum::Resurrect => "Resurrect",
             // Merchant
-            Ability::Dice => "Dice",
-            Ability::CoinToss => "CoinToss",
-            Ability::Fortune => "Fortune",
-            Ability::Interest => "Interest",
+            AbilityNameEnum::Dice => "Dice",
+            AbilityNameEnum::CoinToss => "CoinToss",
+            AbilityNameEnum::Fortune => "Fortune",
+            AbilityNameEnum::Interest => "Interest",
 
             // Thief
-            Ability::SmokeScreen => "Smoke Screen",
-            Ability::Backstab => "Backstab",
-            Ability::Pickpocket => "Pickpocket",
-            Ability::ShadowStep => "Shadow Step",
+            AbilityNameEnum::SmokeScreen => "Smoke Screen",
+            AbilityNameEnum::Backstab => "Backstab",
+            AbilityNameEnum::Pickpocket => "Pickpocket",
+            AbilityNameEnum::ShadowStep => "Shadow Step",
 
             // Bard
-            Ability::Cleanse => "Cleanse",
-            Ability::Dance => "Dance",
-            Ability::Helix => "Helix",
-            Ability::Mimic => "Mimic",
+            AbilityNameEnum::Cleanse => "Cleanse",
+            AbilityNameEnum::Dance => "Dance",
+            AbilityNameEnum::Helix => "Helix",
+            AbilityNameEnum::Mimic => "Mimic",
 
         }.to_string()
     }

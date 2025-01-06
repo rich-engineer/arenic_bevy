@@ -1,12 +1,8 @@
 use bevy::prelude::*;
 
-
-#[derive(Event)]
-pub struct SelectedArenaUpdatedEvent;
-
 #[derive(Resource)]
 pub struct GlobalState {
-    pub selected_character: Option<Entity>,
+    // pub selected_character: Option<Entity>,
     pub current_arena: u8,
     pub active_menu: bool,
 }
@@ -15,7 +11,7 @@ pub struct GlobalState {
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
-            selected_character: None,
+            // selected_character: None,
             current_arena: 0,
             active_menu: false
         }
@@ -32,6 +28,7 @@ impl Plugin for StatePlugin {
 }
 
 #[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
+#[allow(dead_code)]
 pub enum GameState {
 
     Title,

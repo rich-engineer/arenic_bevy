@@ -116,7 +116,6 @@ fn start_button_system(
     window: Single<Entity, With<Window>>,
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), Changed<Interaction>>,
     cursor_icons: Res<CursorIcons>,
-    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
