@@ -1,8 +1,8 @@
-use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
-use crate::arenas::{ArenaNameEnum};
+use bevy::color::palettes::tailwind::{GRAY_400, GRAY_950, RED_400};
+use crate::arenas::{Arena, ArenaBossText, ArenaName, ArenaNameEnum, ArenasParentTransform};
 use crate::characters::CharacterClassEnum;
+use crate::constants::{FONT_SIZE, GRID_HEIGHT, GRID_WIDTH,OFFSET_MATRIX, PROGRESS_BAR_HEIGHT, TILE_SIZE, TOTAL_ARENAS_LENGTH};
 use crate::shared_traits::EnumDisplay;
 use crate::state::{GlobalState};
 
@@ -10,92 +10,9 @@ pub struct HighlightRectPlugin;
 
 impl Plugin for HighlightRectPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (camera_setup, create_ui, setup_all_arenas));
-        app.add_systems(Update, (
-            handle_camera_input,
-            highlight_arena_system,
-            update_arena_boss_text,
-            update_camera.after(handle_camera_input),
+        app.add_systems(Startup, ( create_ui, setup_all_arenas));
 
-        ));
     }
-}
-
-#[derive(Component)]
-pub struct Arena {
-    pub id: u8,
-}
-#[derive(Component)]
-pub struct ArenasParentTransform;
-#[derive(Component)]
-pub struct ArenaBossText;
-
-#[derive(Component)]
-pub struct ArenaName(pub String);
-
-const PROGRESS_BAR_HEIGHT: f32 = 8.0;
-const FONT_SIZE: f32 = 9.0;
-
-// Magic number just get over it;
-const MENU_Y_OFFSET: f32 = -53.0;
-const TOTAL_ARENAS_LENGTH: usize = 9;
-const MENU_SCALE: f32 = 3.0;
-const MENU_POS: Vec3 =  Vec3::new(
-    0.0,
-    MENU_Y_OFFSET,
-    0.0
-);
-const GAME_SCALE: f32 = 1.0;
-const GRID_WIDTH: usize = 65;
-const GRID_HEIGHT: usize = 31;
-const TILE_SIZE: f32 = 19.0;
-const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
-    Vec2::new(-1.0, 1.0), // 0
-    Vec2::new(0.0, 1.0), // 1
-    Vec2::new(1.0, 1.0), // 2
-    Vec2::new(-1.0, 0.0), // 3
-    Vec2::new(0.0, 0.0), // 4
-    Vec2::new(1.0, 0.0), // 5
-    Vec2::new(-1.0, -1.0), // 6
-    Vec2::new(0.0, -1.0), // 7
-    Vec2::new(1.0, -1.0), // 8
-];
-
-fn get_current_arena_pos(global_state: &Res<GlobalState>) -> Vec3 {
-    let current_arena = global_state.current_arena as usize;
-    let offset_x = GRID_WIDTH as f32 * TILE_SIZE;
-    let offset_y = GRID_HEIGHT as f32  * TILE_SIZE;
-
-    Vec3::new(
-        offset_x * OFFSET_MATRIX[current_arena].x - 1.0,
-        offset_y * OFFSET_MATRIX[current_arena].y - 1.0,
-        0.0
-    )
-}
-pub fn camera_setup(mut commands: Commands, global_state: Res<GlobalState>) {
-    let new_position = get_current_arena_pos(&global_state);
-    commands.spawn((
-        Camera2d,
-        Camera {
-            clear_color: ClearColorConfig::Custom(Color::from(GRAY_50)),
-            ..Default::default()
-        },
-        OrthographicProjection {
-            near: -1000.0,
-            scale: 1.0,
-            far: 1000.0,
-            viewport_origin: Vec2::new(0.5,0.5),
-            scaling_mode: ScalingMode::AutoMin {
-                min_width: 1280.0,
-                min_height: 720.0,
-            },
-            area: Rect::new(-1.0, -1.0, 1.0, 1.0),
-        },
-        Transform {
-            translation: new_position,
-            ..Default::default()
-        },
-    ));
 }
 
 fn create_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -112,9 +29,8 @@ fn create_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ))
         .with_children(|parent| create_top_navigation(parent, "Hunter", font))
-
-      .with_children(create_inner_container)
-      .with_children(create_bottom_bar);
+        .with_children(create_inner_container)
+        .with_children(create_bottom_bar);
 }
 fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
     parent.spawn((
@@ -141,20 +57,7 @@ fn spawn_arena_boss(parent: &mut ChildBuilder, text: &str, font: Handle<Font>) {
     ));
 }
 
-fn update_arena_boss_text(
-    mut query: Query<&mut Text, With<ArenaBossText>>,
-    arenas: Query<(&Arena, &ArenaName)>,
-    state: Res<GlobalState>,
-) {
-    let current_arena_id = state.current_arena;
 
-    if let Some((_, arena_name)) = arenas.iter().find(|(arena, _)| arena.id == current_arena_id) {
-        for mut text in &mut query {
-            text.clear();
-            text.push_str(&arena_name.0);
-        }
-    }
-}
 fn create_top_navigation(mut commands: &mut ChildBuilder, text: &str, font: Handle<Font>) {
     let top_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands.spawn((
@@ -243,8 +146,6 @@ fn create_bottom_bar(mut commands: &mut ChildBuilder) {
     ));
 }
 
-
-
 pub fn setup_all_arenas(mut commands:Commands,  asset_server: Res<AssetServer>) {
 
     commands
@@ -321,53 +222,6 @@ pub fn setup_tiles(mut commands: &mut ChildBuilder, texture: Handle<Image>) {
         }
 
     }
-}
-
-fn highlight_arena_system(mut gizmos: Gizmos, state: Res<GlobalState>) {
-    if state.active_menu == false { return; }
-    let current_arena_index = state.current_arena as usize;
-    let total_width = GRID_WIDTH as f32 * TILE_SIZE;
-    let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
-    for i in 0..3 {
-        let pos = Vec2::new(
-            total_width * OFFSET_MATRIX[current_arena_index].x + i as f32,
-            total_height * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) -  i as f32,
-        );
-        gizmos.rect_2d(
-            pos,
-            Vec2::new(total_width, total_height),
-            Color::hsla(0.0, 0.0, 0.0, 1.0),
-        );
-    }
-}
-
-fn handle_camera_input(mut global_state: ResMut<GlobalState>, keyboard_input: Res<ButtonInput<KeyCode>>) {
-    if keyboard_input.just_pressed(KeyCode::BracketLeft) {
-        global_state.current_arena = (global_state.current_arena + 9 - 1) % 9;
-    }
-    if keyboard_input.just_pressed(KeyCode::BracketRight) {
-        global_state.current_arena = (global_state.current_arena + 1) % 9;
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyP) {
-        global_state.active_menu = !global_state.active_menu;
-    }
-}
-fn update_camera(
-    state: Res<GlobalState>,
-    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
-) {
-
-    let Ok((mut projection, mut transform)) = query.get_single_mut() else { return };
-
-    let (scale, position) = if state.active_menu {
-        (MENU_SCALE, MENU_POS)
-    } else {
-        (GAME_SCALE, get_current_arena_pos(&state))
-    };
-
-    projection.scale = scale;
-    transform.translation = position;
 }
 
 fn get_arena_name(
