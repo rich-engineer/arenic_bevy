@@ -1,7 +1,7 @@
 use crate::constants::{
     GAME_SCALE, GRID_HEIGHT, GRID_WIDTH, MENU_POS, MENU_SCALE, OFFSET_MATRIX, TILE_SIZE,
 };
-use crate::state::GlobalState;
+use crate::state::{GameState, GlobalState};
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
@@ -15,9 +15,11 @@ impl Plugin for CamerasPlugin {
             Update,
             (
                 handle_camera_input,
-                update_camera.after(handle_camera_input),
-            ),
+            ).run_if(not(
+                in_state(GameState::Title)
+            )),
         );
+        app.add_systems(Update, update_camera.after(handle_camera_input));
     }
 }
 

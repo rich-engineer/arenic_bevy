@@ -116,13 +116,14 @@ fn start_button_system(
     window: Single<Entity, With<Window>>,
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), Changed<Interaction>>,
     cursor_icons: Res<CursorIcons>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 *color = BackgroundColor(Color::Srgba(GRAY_200));
                 commands.entity(*window).insert(cursor_icons.0[1].clone());
-                // next_state.set(GameState::Start)
+                next_state.set(GameState::Intro)
             }
             Interaction::Hovered => {
                 *color = BackgroundColor(Color::Srgba(GRAY_100));

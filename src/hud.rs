@@ -1,27 +1,24 @@
 use crate::arenas::ArenaBossText;
 use crate::constants::{FONT_SIZE, PROGRESS_BAR_HEIGHT};
-use bevy::app::{App, Plugin, Startup};
+use bevy::app::{App, Plugin};
 use bevy::asset::{AssetServer, Handle};
-use bevy::color::palettes::tailwind::{GRAY_400, GRAY_950, RED_400};
+use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::color::Color;
 use bevy::hierarchy::{ChildBuild, ChildBuilder};
-use bevy::prelude::{
-    default, BackgroundColor, BuildChildren, Commands, Display, FlexDirection, Font,
-    JustifyContent, JustifyText, Node, PositionType, Res, Text, TextColor, TextFont, TextLayout,
-    UiRect, Val,
-};
+use bevy::prelude::*;
+use crate::state::GameState;
 
 pub struct HUDPlugin;
 
 impl Plugin for HUDPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, create_ui);
+        app.add_systems(OnEnter(GameState::Intro), create_ui);
     }
 }
 
 fn create_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/DMSans-Black.ttf");
-    // let name = get_arena_name(&state);
+
     commands
         .spawn((Node {
             position_type: PositionType::Relative,
@@ -37,7 +34,6 @@ fn create_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn create_top_navigation(commands: &mut ChildBuilder, text: &str, font: Handle<Font>) {
-    let top_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands
         .spawn((
             Node {
@@ -46,7 +42,7 @@ fn create_top_navigation(commands: &mut ChildBuilder, text: &str, font: Handle<F
                 height: Val::Percent(5.9),
                 ..default()
             },
-            BackgroundColor(top_bar_color),
+            BackgroundColor(Color::Srgba(GRAY_50)),
         ))
         .with_children(spawn_progress_bar)
         .with_children(|parent| spawn_arena_boss(parent, text, font));
@@ -92,36 +88,33 @@ fn create_inner_container(commands: &mut ChildBuilder) {
         .with_children(create_right_navigation);
 }
 fn create_left_navigation(commands: &mut ChildBuilder) {
-    let left_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands.spawn((
         Node {
             position_type: PositionType::Relative,
             width: Val::Percent(1.71875),
             ..default()
         },
-        BackgroundColor(left_bar_color),
+        BackgroundColor(Color::Srgba(GRAY_50)),
     ));
 }
 fn create_right_navigation(commands: &mut ChildBuilder) {
-    let left_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands.spawn((
         Node {
             position_type: PositionType::Relative,
             width: Val::Percent(1.71875),
             ..default()
         },
-        BackgroundColor(left_bar_color),
+        BackgroundColor(Color::Srgba(GRAY_50)),
     ));
 }
 fn create_bottom_bar(commands: &mut ChildBuilder) {
-    let bottom_bar_color = Color::hsla(1.0, 1.0, 1.0, 1.0);
     commands.spawn((
         Node {
             height: Val::Percent(14.3),
             width: Val::Percent(100.0),
             ..default()
         },
-        BackgroundColor(bottom_bar_color),
+        BackgroundColor(Color::Srgba(GRAY_50)),
     ));
 }
 

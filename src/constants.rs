@@ -12,6 +12,8 @@ pub const GAME_SCALE: f32 = 1.0;
 pub const GRID_WIDTH: usize = 65;
 pub const GRID_HEIGHT: usize = 31;
 pub const TILE_SIZE: f32 = 19.0;
+pub const ARENA_WIDTH: f32 = GRID_WIDTH as f32 * TILE_SIZE;
+pub const ARENA_HEIGHT: f32 = GRID_HEIGHT as f32 * TILE_SIZE;
 
 pub const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
     Vec2::new(-1.0, 1.0),  // 0

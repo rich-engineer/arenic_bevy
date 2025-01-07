@@ -6,7 +6,7 @@ use crate::shared_traits::EnumDisplay;
 use crate::state::GlobalState;
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct Arena {
     pub id: u8,
 }
@@ -125,49 +125,56 @@ pub fn get_arena_name_for_id(arena_id: u8) -> String {
     .to_uppercase()
 }
 
-pub fn setup_all_arenas(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn((
-            ArenasParentTransform,
-            Transform::from_xyz(0.0, 0.0, 0.0),
-            InheritedVisibility::default(),
-            GlobalTransform::default(),
-        ))
-        .with_children(|arena| {
-            for i in 0..TOTAL_ARENAS_LENGTH {
-                let arena_id = i as u8;
-                let total_width = GRID_WIDTH as f32 * TILE_SIZE;
-                let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
-                let offset = OFFSET_MATRIX[i];
-                let texture = match i {
-                    0 => asset_server.load("UI/hunter_tile.png"),
-                    1 => asset_server.load("UI/guild_tile.png"),
-                    2 => asset_server.load("UI/cardinal_tile.png"),
-                    3 => asset_server.load("UI/forager_tile.png"),
-                    4 => asset_server.load("UI/warrior_tile.png"),
-                    5 => asset_server.load("UI/thief_tile.png"),
-                    6 => asset_server.load("UI/alchemist_tile.png"),
-                    7 => asset_server.load("UI/merchant_tile.png"),
-                    8 => asset_server.load("UI/bard_tile.png"),
-                    _ => asset_server.load("UI/default_tile.png"),
-                };
+pub fn setup_all_arenas(
+    mut commands: Commands,
+    parent: Query<Entity, With<ArenasParentTransform>>,
+    asset_server: Res<AssetServer>
+) {
+    let parent_entity = if let Ok(entity) = parent.get_single() {
+        entity
+    } else {
+        commands
+            .spawn((
+                ArenasParentTransform,
+                Transform::from_xyz(0.0, 0.0, 0.0),
+                InheritedVisibility::default(),
+                GlobalTransform::default(),
+            ))
+            .id()
+    };
 
-                let start_x = -(total_width / 2.0) + (TILE_SIZE / 2.0) + (total_width * offset.x);
-                let start_y = (total_height / 2.0) + (TILE_SIZE - 1.0) + (total_height * offset.y);
+    for i in 0..TOTAL_ARENAS_LENGTH {
+        let arena_id = i as u8;
+        let total_width = GRID_WIDTH as f32 * TILE_SIZE;
+        let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
+        let offset = OFFSET_MATRIX[i];
+        let texture = match 9 {
+            0 => asset_server.load("UI/hunter_tile.png"),
+            1 => asset_server.load("UI/guild_tile.png"),
+            2 => asset_server.load("UI/cardinal_tile.png"),
+            3 => asset_server.load("UI/forager_tile.png"),
+            4 => asset_server.load("UI/warrior_tile.png"),
+            5 => asset_server.load("UI/thief_tile.png"),
+            6 => asset_server.load("UI/alchemist_tile.png"),
+            7 => asset_server.load("UI/merchant_tile.png"),
+            8 => asset_server.load("UI/bard_tile.png"),
+            _ => asset_server.load("UI/default_tile.png"),
+        };
 
-                arena
-                    .spawn((
-                        Arena { id: arena_id },
-                        ArenaName(get_arena_name_for_id(arena_id)),
-                        // ArenaBosses,
-                        // ArenaHeroes,
-                        Transform::from_xyz(start_x, start_y, 0.0),
-                        InheritedVisibility::default(),
-                        GlobalTransform::default(),
-                    ))
-                    .with_children(|parent| setup_tiles(parent, texture));
-            }
-        });
+        let start_x = -(total_width / 2.0) + (TILE_SIZE / 2.0) + (total_width * offset.x);
+        let start_y = (total_height / 2.0) + (TILE_SIZE - 1.0) + (total_height * offset.y);
+        info!("startx: {}, starty: {}", start_x, start_y);
+        commands
+            .spawn((
+                Arena { id: arena_id, },
+                ArenaName(get_arena_name_for_id(arena_id)),
+                Transform::from_xyz(start_x, start_y, 0.0),
+                InheritedVisibility::default(),
+                GlobalTransform::default(),
+            ))
+            .set_parent(parent_entity)
+            .with_children(|parent| setup_tiles(parent, texture));
+    }
 }
 
 pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
@@ -195,3 +202,19 @@ impl Plugin for ArenaPlugin {
         app.add_systems(Update, (update_arena_boss_text, highlight_arena_system));
     }
 }
+
+
+//
+// fn example_system(
+//     arena_query: Query<Entity, With<Arena>>,
+//     children: Query<&Children>,
+//     characters: Query<&GuildMaster>
+// ) {
+//     for arena_entity in &arena_query {
+//         for child in children.iter_descendants(arena_entity) {
+//             if characters.contains(child) {
+//                 // This child is a character
+//             }
+//         }
+//     }
+// }

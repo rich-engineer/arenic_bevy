@@ -23,6 +23,9 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GlobalState>().init_state::<GameState>();
+            // .add_systems(Update, log_state_changes);
+            // Add our system to run whenever GameState changes
+
     }
 }
 
@@ -31,6 +34,8 @@ impl Plugin for StatePlugin {
 pub enum GameState {
     #[default]
     Title,
+
+    Intro,
     Menu,
     Arena(ArenaNameEnum),
     Rotate,
@@ -38,4 +43,9 @@ pub enum GameState {
     Gacha,
     AuctionHouse,
     CraftWorkshop,
+}
+
+fn log_state_changes(state: Res<State<GameState>>) {
+    // This will run on startup and whenever the state changes
+    info!("Current Game State: {:?}", *state);
 }

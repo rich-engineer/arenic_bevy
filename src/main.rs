@@ -10,6 +10,7 @@ mod interactions;
 mod shared_traits;
 mod state;
 mod title;
+mod intro;
 
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;
@@ -18,6 +19,7 @@ use characters::CharactersPlugin;
 use hud::HUDPlugin;
 use state::StatePlugin;
 use title::TitlePlugin;
+use crate::intro::IntroPlugin;
 
 const RESOLUTION: (f32, f32) = (1280.0, 720.0);
 fn main() {
@@ -37,8 +39,9 @@ fn main() {
         )
         .add_plugins(StatePlugin)
         .add_plugins(CamerasPlugin)
+        .add_plugins(IntroPlugin)
         .add_plugins(TitlePlugin)
-        .add_plugins(HUDPlugin)
+        // .add_plugins(HUDPlugin)
         .add_plugins(AbilitiesPlugin)
         .add_plugins(ArenaPlugin)
         .add_plugins(CharactersPlugin)
