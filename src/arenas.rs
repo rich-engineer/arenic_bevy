@@ -1,7 +1,5 @@
 use crate::characters::CharacterClassEnum;
-use crate::constants::{
-    GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH,
-};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH};
 use crate::shared_traits::EnumDisplay;
 use crate::state::GlobalState;
 use bevy::prelude::*;
@@ -145,8 +143,6 @@ pub fn setup_all_arenas(
 
     for i in 0..TOTAL_ARENAS_LENGTH {
         let arena_id = i as u8;
-        let total_width = GRID_WIDTH as f32 * TILE_SIZE;
-        let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
         let offset = OFFSET_MATRIX[i];
         let texture = match 9 {
             0 => asset_server.load("UI/hunter_tile.png"),
@@ -160,10 +156,10 @@ pub fn setup_all_arenas(
             8 => asset_server.load("UI/bard_tile.png"),
             _ => asset_server.load("UI/default_tile.png"),
         };
+        // move 4th quadrant + offset for tile size + Translate by ARENA_SIZE 1280 * 0 (make 4th quadrant)
+        let start_x = -(ARENA_WIDTH / 2.0) + (TILE_SIZE / 2.0) + (ARENA_WIDTH * offset.x);
+        let start_y = (ARENA_HEIGHT / 2.0) + (TILE_SIZE - 1.0) + (ARENA_HEIGHT * offset.y);
 
-        let start_x = -(total_width / 2.0) + (TILE_SIZE / 2.0) + (total_width * offset.x);
-        let start_y = (total_height / 2.0) + (TILE_SIZE - 1.0) + (total_height * offset.y);
-        info!("startx: {}, starty: {}", start_x, start_y);
         commands
             .spawn((
                 Arena { id: arena_id, },

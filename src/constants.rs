@@ -15,6 +15,7 @@ pub const TILE_SIZE: f32 = 19.0;
 pub const ARENA_WIDTH: f32 = GRID_WIDTH as f32 * TILE_SIZE;
 pub const ARENA_HEIGHT: f32 = GRID_HEIGHT as f32 * TILE_SIZE;
 
+pub const ARENA_CENTER: Vec2 = Vec2::new((ARENA_WIDTH / 2.0) - (TILE_SIZE / 2.0), -((ARENA_HEIGHT / 2.0) - (TILE_SIZE / 2.0)));
 pub const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
     Vec2::new(-1.0, 1.0),  // 0
     Vec2::new(0.0, 1.0),   // 1

@@ -15,7 +15,6 @@ mod intro;
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;
 use cameras::CamerasPlugin;
-use characters::CharactersPlugin;
 use hud::HUDPlugin;
 use state::StatePlugin;
 use title::TitlePlugin;
@@ -41,9 +40,8 @@ fn main() {
         .add_plugins(CamerasPlugin)
         .add_plugins(IntroPlugin)
         .add_plugins(TitlePlugin)
-        // .add_plugins(HUDPlugin)
+        .add_plugins(HUDPlugin)
         .add_plugins(AbilitiesPlugin)
         .add_plugins(ArenaPlugin)
-        .add_plugins(CharactersPlugin)
         .run();
 }
