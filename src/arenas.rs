@@ -198,19 +198,3 @@ impl Plugin for ArenaPlugin {
         app.add_systems(Update, (update_arena_boss_text, highlight_arena_system));
     }
 }
-
-
-//
-// fn example_system(
-//     arena_query: Query<Entity, With<Arena>>,
-//     children: Query<&Children>,
-//     characters: Query<&GuildMaster>
-// ) {
-//     for arena_entity in &arena_query {
-//         for child in children.iter_descendants(arena_entity) {
-//             if characters.contains(child) {
-//                 // This child is a character
-//             }
-//         }
-//     }
-// }
