@@ -17,6 +17,9 @@ pub struct ArenasParent;
 pub struct ArenaBossText;
 
 #[derive(Component)]
+pub struct SelectedHero(pub Option<Entity>);
+
+#[derive(Component)]
 pub struct ArenaName(pub String);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -170,6 +173,7 @@ pub fn setup_all_arenas(
                 Transform::from_xyz(start_x, start_y, 0.0),
                 InheritedVisibility::default(),
                 GlobalTransform::default(),
+                SelectedHero(None)
             ))
             .set_parent(parent_entity)
             .with_children(|parent| setup_tiles(parent, texture));
@@ -192,6 +196,8 @@ pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
         }
     }
 }
+
+
 
 pub struct ArenaPlugin;
 

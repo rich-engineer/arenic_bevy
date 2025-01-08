@@ -1,4 +1,4 @@
-use crate::arenas::Arena;
+use crate::arenas::{Arena, SelectedHero};
 use crate::characters::{
     CachedState, CharacterClass, CharacterClassEnum, CharacterName, CharacterType,
     CharacterTypeEnum, ParentArena,
@@ -15,6 +15,7 @@ use bevy::prelude::*;
 
 pub struct IntroPlugin;
 
+
 impl Plugin for IntroPlugin {
     // TODO If your replay logic should run in a specific order relative to other systems, use .before() / .after() or the new .chain() approach in Bevy 0.11+.
     fn build(&self, app: &mut App) {
@@ -22,16 +23,17 @@ impl Plugin for IntroPlugin {
         app.add_systems(OnEnter(GameState::Intro), set_camera_pos);
         app.add_systems(
             OnEnter(GameState::Intro),
-            intro_spawn_guildmaster.after(set_camera_pos),
+            intro_spawn_guildmaster_and_recruit.after(set_camera_pos),
         );
         app.add_systems(
             OnEnter(GameState::Intro),
-            select_first_hero_in_current_arena.after(intro_spawn_guildmaster),
+            select_first_hero_in_current_arena.after(intro_spawn_guildmaster_and_recruit),
         );
         app.add_systems(Update, clear_timeline_on_record_start);
         app.add_systems(
             Update,
             (
+                // cycle_hero_selection
                 move_selected_hero,
                 handle_hero_arena_transition,
                 record_selected_character,
@@ -46,82 +48,124 @@ impl Plugin for IntroPlugin {
 fn set_camera_pos(mut state: ResMut<GlobalState>) {
     state.current_arena = 8;
 }
-fn intro_spawn_guildmaster(
+
+
+fn intro_spawn_guildmaster_and_recruit(
     mut commands: Commands,
     query: Query<(Entity, &Arena)>,
     asset_server: Res<AssetServer>,
     state: Res<GlobalState>,
 ) {
-    let texture = asset_server.load("UI/player_selected.png");
-    // info!( state.current_arena);
-    if let Some((arena_entity, _)) = query
-        .iter()
-        .find(|(_, arena)| arena.id == state.current_arena)
-    {
-        let x = ARENA_CENTER.x;
-        let y = ARENA_CENTER.y;
-        // TODO()! set CharacterAbilities as a entity using set_parent() to character
-        // TODO()! figure out keybindings later
-        commands
-            .spawn((
-                Transform::from_xyz(x, y, 9.0),
-                InheritedVisibility::default(),
-                GlobalTransform::default(),
-                CharacterName("Dean".to_string()),
-                CharacterType(CharacterTypeEnum::Hero),
-                CharacterClass(CharacterClassEnum::GuildMaster),
-                ParentArena(state.current_arena),
-                Sprite {
-                    image: texture,
-                    custom_size: Some(Vec2::new(19.0, 19.0)),
-                    ..default()
-                },
-                EventTimeline::default(),
-                RecordMode::Empty,
-                CachedState {
-                    previous_transform: Transform::IDENTITY,
-                    previous_arena: ParentArena(state.current_arena),
-                    record_start_time: Some(0.0),
-                    playback_start_time: None,
-                    playback_current_index: 0,
-                },
-            ))
-            .set_parent(arena_entity);
-    }
+    let texture_selected = asset_server.load("UI/player_selected.png");
+    let texture_unselected = asset_server.load("UI/player.png");
+    let Some((arena_entity, _)) = query.iter().find(|(_, arena)| arena.id == state.current_arena) else {
+        return;
+    };
+
+    let x = ARENA_CENTER.x;
+    let y = ARENA_CENTER.y;
+
+    let guildmaster_entity = commands
+        .spawn((
+            Transform::from_xyz(x - (TILE_SIZE * 4.0), y, 9.0),
+            InheritedVisibility::default(),
+            GlobalTransform::default(),
+            CharacterName("Dean".to_string()),
+            CharacterType(CharacterTypeEnum::Hero),
+            CharacterClass(CharacterClassEnum::GuildMaster),
+            ParentArena(state.current_arena),
+            Sprite {
+                image: texture_selected,
+                custom_size: Some(Vec2::new(19.0, 19.0)),
+                ..default()
+            },
+            EventTimeline::default(),
+            RecordMode::Empty,
+            CachedState {
+                previous_transform: Transform::IDENTITY,
+                previous_arena: ParentArena(state.current_arena),
+                record_start_time: Some(0.0),
+                playback_start_time: None,
+                playback_current_index: 0,
+            },
+        ))
+        .set_parent(arena_entity).id();
+
+    commands.entity(arena_entity).insert(SelectedHero(Some(guildmaster_entity)));
+
+    commands
+        .spawn((
+            Transform::from_xyz(x + (TILE_SIZE * 4.0), y, 9.0),
+            InheritedVisibility::default(),
+            GlobalTransform::default(),
+            CharacterName("Matthew".to_string()),
+            CharacterType(CharacterTypeEnum::Hero),
+            CharacterClass(CharacterClassEnum::Hunter),
+            ParentArena(state.current_arena),
+            Sprite {
+                image: texture_unselected,
+                custom_size: Some(Vec2::new(19.0, 19.0)),
+                ..default()
+            },
+            EventTimeline::default(),
+            RecordMode::Empty,
+            CachedState {
+                previous_transform: Transform::IDENTITY,
+                previous_arena: ParentArena(state.current_arena),
+                record_start_time: Some(0.0),
+                playback_start_time: None,
+                playback_current_index: 0,
+            },
+        ))
+        .set_parent(arena_entity);
 }
 
 /// # References
 /// [Using Tags to Connect and Move Entities in a Parent-Child in ECS](https://stealth-startup.youtrack.cloud/issue/A-1/Using-Tags-to-Connect-and-Move-Entities-in-a-Parent-Child-in-ECS)
 fn select_first_hero_in_current_arena(
     mut commands: Commands,
-    query: Query<(Entity, &ParentArena, &CharacterType)>,
+    arena_query: Query<(Entity, &Arena, &SelectedHero)>,
+    hero_query: Query<Entity, With<CharacterType>>,
     state: Res<GlobalState>,
     asset_server: Res<AssetServer>,
 ) {
-    let texture = asset_server.load("UI/player_selected.png");
+    // Load the texture used for the hero selection marker
+    let selection_texture = asset_server.load("UI/player_selected.png");
 
-    if let Some((hero_entity, p_arena, _)) = query
+    // Find the arena whose ID matches the current arena
+    let Some((arena_entity, _, selected_hero)) = arena_query
         .iter()
-        .find(|(_, p, c)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
-    {
-        /// # References
-        /// [Parent/Child Sprite Layering in Bevy 2D](https://stealth-startup.youtrack.cloud/issue/A-2/Understanding-Parent-Child-Sprite-Layering-in-Bevy-2D)
-        commands
-            .spawn((
-                Transform::from_xyz(0.0, 0.0, -1.0),
-                GlobalTransform::default(),
-                Sprite {
-                    image: texture.clone(),
-                    color: Color::srgba(0.0, 0.0, 0.0, 0.25),
-                    custom_size: Some(Vec2::new(24.0, 24.0)),
-                    ..default()
-                },
-            ))
-            .set_parent(hero_entity);
+        .find(|(_, arena, _)| arena.id == state.current_arena)
+    else {
+        return;
+    };
+
+    // If there's already a selected hero, use that; otherwise pick the first available hero
+    let hero_to_highlight = if let Some(hero_entity) = selected_hero.0 {
+        hero_entity
+    } else if let Some(first_hero) = hero_query.iter().next() {
+        commands.entity(arena_entity).insert(SelectedHero(Some(first_hero)));
+        first_hero
     } else {
-        info!("No Hero found in arena {}", state.current_arena);
-    }
+        // No heroes to select
+        return;
+    };
+
+    // Spawn the marker as a child of the selected hero
+    commands
+        .spawn((
+            Transform::from_xyz(0.0, 0.0, -1.0),
+            GlobalTransform::default(),
+            Sprite {
+                image: selection_texture,
+                color: Color::srgba(0.0, 0.0, 0.0, 0.25),
+                custom_size: Some(Vec2::new(24.0, 24.0)),
+                ..default()
+            },
+        ))
+        .set_parent(hero_to_highlight);
 }
+
 
 /// # Reference
 /// [Mut Queries](https://stealth-startup.youtrack.cloud/issue/A-3/How-to-Fix-Transform-Mutations-in-Bevy-ECS)

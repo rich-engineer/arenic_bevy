@@ -63,9 +63,9 @@ pub struct CharacterSpawner;
 
 #[derive(Component)]
 pub struct CachedState {
-    pub(crate) previous_transform: Transform,
-    pub(crate) previous_arena: ParentArena,
-    pub(crate) record_start_time: Option<f64>,
+    pub previous_transform: Transform,
+    pub previous_arena: ParentArena,
+    pub record_start_time: Option<f64>,
     pub playback_start_time: Option<f64>,
     pub playback_current_index: usize,
 }
