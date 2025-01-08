@@ -40,7 +40,7 @@ fn intro_spawn_guildmaster(
     state: Res<GlobalState>
 ) {
     let texture = asset_server.load("UI/player_selected.png");
-    info!( state.current_arena);
+    // info!( state.current_arena);
     if let Some((arena_entity, _)) = query
         .iter()
         .find(|(_, arena)| {
@@ -372,7 +372,6 @@ fn record_selected_character(
                 RecordMode::Recording => {
                     *hero_record_mode = RecordMode::Playback;
                     info!("RecordMode changed to: Playback");
-                    *hero_transform = cached_state.previous_transform;
                 }
                 RecordMode::Playback => {
                     *hero_record_mode = RecordMode::Pending;
@@ -414,7 +413,6 @@ fn timeline_replay_event_system(
 
         if playback_elapsed > RECORD_TIME_SECONDS {
             *record_mode = RecordMode::Pending;
-            // reset logic
             cached_state.playback_start_time = None;
             cached_state.playback_current_index = 0;
             continue;
@@ -441,10 +439,15 @@ fn clear_timeline_on_record_start(
 ) {
     for (record_mode, mut timeline, mut cached_state, mut hero_transform, mut p_arena) in query.iter_mut() {
         if *record_mode == RecordMode::Recording {
+            info!("************************************a");
             timeline.events.clear();
+            cached_state.playback_start_time = None;
             cached_state.previous_transform = *hero_transform;
             cached_state.previous_arena = p_arena.clone();
             cached_state.record_start_time = Some(time.elapsed_secs_f64());
+        }
+        if *record_mode == RecordMode::Playback {
+            *hero_transform = cached_state.previous_transform;
         }
     }
 }
