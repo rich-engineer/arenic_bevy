@@ -120,90 +120,99 @@ fn select_first_hero_in_current_arena(
 /// [Mut Queries](https://stealth-startup.youtrack.cloud/issue/A-3/How-to-Fix-Transform-Mutations-in-Bevy-ECS)
 fn move_selected_hero(
     mut query: Query<(
-        Entity,
         &ParentArena,
         &CharacterType,
         &mut Transform,
         &mut EventTimeline,
         &RecordMode,
-        &CachedState
+        &CachedState,
     )>,
     state: Res<GlobalState>,
     input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    // Use `.iter_mut()` to get a mutable iterator
-    if let Some((hero_entity, p_arena, _, mut hero_transform, mut timeline, record_mode, cached_state)) = query
+    // Find hero in current arena
+    let Some((parent_arena, _, mut hero_transform, mut timeline, record_mode, cached_state)) = query
         .iter_mut()
-        .find(|(_, p, c, _, _, _, _)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
-    {
-        if *record_mode != RecordMode::Empty && *record_mode != RecordMode::Recording {
-            return;
-        }
-        // Only record events if we're in Recording mode AND have a valid start time
-        let should_record = *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
-        let current_relative_time = if let Some(start) = cached_state.record_start_time {
-            time.elapsed_secs_f64() - start
+        .find(|(p, c, ..)| {
+            p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero
+        }) else { return };
+
+    // Early return if not in correct recording mode
+    if !matches!(record_mode, RecordMode::Empty | RecordMode::Recording) {
+        return;
+    }
+    // Use `.iter_mut()` to get a mutable iterator
+
+    let should_record = *record_mode == RecordMode::Recording
+        && cached_state.record_start_time.is_some();
+
+    let current_time = cached_state
+        .record_start_time
+        .map_or(0.0, |start| time.elapsed_secs_f64() - start);
+    // Only record events if we're in Recording mode AND have a valid start time
+    let should_record = *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
+    let current_relative_time = if let Some(start) = cached_state.record_start_time {
+        time.elapsed_secs_f64() - start
+    } else {
+        0.0
+    };
+
+
+    if input.just_pressed(KeyCode::KeyW) {
+        if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW)  {
+            hero_transform.translation.y = TOP_BOUND;
         } else {
-            0.0
-        };
+            hero_transform.translation.y += TILE_SIZE;
+        }
+        if should_record {
+            timeline.events.push(ActionEvent {
+                action: ActionEnum::KeyW,
+                timestamp: current_relative_time,
+            });
+        }
+    }
 
-
-        if input.just_pressed(KeyCode::KeyW) {
-            if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW)  {
-                hero_transform.translation.y = TOP_BOUND;
-            } else {
-                hero_transform.translation.y += TILE_SIZE;
-            }
-            if should_record {
-                timeline.events.push(ActionEvent {
-                    action: ActionEnum::KeyW,
-                    timestamp: current_relative_time,
-                });
-            }
+    if input.just_pressed(KeyCode::KeyA) {
+        if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
+            hero_transform.translation.x = LEFT_BOUND;
+        } else {
+            hero_transform.translation.x -= TILE_SIZE;
         }
 
-        if input.just_pressed(KeyCode::KeyA) {
-            if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
-                hero_transform.translation.x = LEFT_BOUND;
-            } else {
-                hero_transform.translation.x -= TILE_SIZE;
-            }
-
-            if should_record {
-                timeline.events.push(ActionEvent {
-                    action: ActionEnum::KeyA,
-                    timestamp: current_relative_time,
-                });
-            }
+        if should_record {
+            timeline.events.push(ActionEvent {
+                action: ActionEnum::KeyA,
+                timestamp: current_relative_time,
+            });
         }
-        if input.just_pressed(KeyCode::KeyS) {
-            if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
-                hero_transform.translation.y = BOTTOM_BOUND;
-            } else {
-                hero_transform.translation.y -= TILE_SIZE;
-            }
-
-            if should_record {
-                timeline.events.push(ActionEvent {
-                    action: ActionEnum::KeyS,
-                    timestamp: current_relative_time,
-                });
-            }
+    }
+    if input.just_pressed(KeyCode::KeyS) {
+        if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
+            hero_transform.translation.y = BOTTOM_BOUND;
+        } else {
+            hero_transform.translation.y -= TILE_SIZE;
         }
-        if input.just_pressed(KeyCode::KeyD) {
-            if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
-                hero_transform.translation.x = RIGHT_BOUND;
-            } else {
-                hero_transform.translation.x += TILE_SIZE;
-            }
 
-            if should_record{
-                timeline.events.push(ActionEvent {
-                    action: ActionEnum::KeyD,
-                    timestamp: current_relative_time,
-                });
-            }
+        if should_record {
+            timeline.events.push(ActionEvent {
+                action: ActionEnum::KeyS,
+                timestamp: current_relative_time,
+            });
+        }
+    }
+    if input.just_pressed(KeyCode::KeyD) {
+        if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
+            hero_transform.translation.x = RIGHT_BOUND;
+        } else {
+            hero_transform.translation.x += TILE_SIZE;
+        }
+
+        if should_record{
+            timeline.events.push(ActionEvent {
+                action: ActionEnum::KeyD,
+                timestamp: current_relative_time,
+            });
         }
     }
 }
