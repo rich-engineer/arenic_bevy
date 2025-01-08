@@ -218,50 +218,51 @@ fn move_selected_hero(
 }
 
 fn playback_action_events(
-    mut query: Query<(Entity, &ParentArena, &CharacterType, &mut Transform, &RecordMode)>,
-    state: Res<GlobalState>,
+    mut query: Query<(&mut Transform, &RecordMode), With<CharacterClass>>,
     mut event_reader: EventReader<ActionEvent>,
+    state: Res<GlobalState>,
 ) {
     // Identify the hero in the current arena
-    if let Some((hero_entity, p_arena, _, mut hero_transform, hero_record_mode)) = query
-        .iter_mut()
-        .find(|(_, p, c, _, _)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
-    {
-        if *hero_record_mode != RecordMode::Playback {
-            event_reader.clear(); // Clear events if not in playback mode
-            return;
-        }
+    let Ok((mut hero_transform, record_mode)) = query.get_single_mut() else {
+        event_reader.clear();
+        return;
+    };
 
-        for event in event_reader.read()  {
-            match event.action {
-                ActionEnum::KeyW => {
-                    // Example: Move up
-                    if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW) {
-                        hero_transform.translation.y = TOP_BOUND;
-                    } else {
-                        hero_transform.translation.y += TILE_SIZE;
-                    }
+    // Early return if not in playback mode
+    if *record_mode != RecordMode::Playback {
+        event_reader.clear();
+        return;
+    }
+
+    for event in event_reader.read()  {
+        match event.action {
+            ActionEnum::KeyW => {
+                // Example: Move up
+                if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW) {
+                    hero_transform.translation.y = TOP_BOUND;
+                } else {
+                    hero_transform.translation.y += TILE_SIZE;
                 }
-                ActionEnum::KeyA => {
-                    if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
-                        hero_transform.translation.x = LEFT_BOUND;
-                    } else {
-                        hero_transform.translation.x -= TILE_SIZE;
-                    }
+            }
+            ActionEnum::KeyA => {
+                if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
+                    hero_transform.translation.x = LEFT_BOUND;
+                } else {
+                    hero_transform.translation.x -= TILE_SIZE;
                 }
-                ActionEnum::KeyS => {
-                    if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
-                        hero_transform.translation.y = BOTTOM_BOUND;
-                    } else {
-                        hero_transform.translation.y -= TILE_SIZE;
-                    }
+            }
+            ActionEnum::KeyS => {
+                if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
+                    hero_transform.translation.y = BOTTOM_BOUND;
+                } else {
+                    hero_transform.translation.y -= TILE_SIZE;
                 }
-                ActionEnum::KeyD => {
-                    if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
-                        hero_transform.translation.x = RIGHT_BOUND;
-                    } else {
-                        hero_transform.translation.x += TILE_SIZE;
-                    }
+            }
+            ActionEnum::KeyD => {
+                if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
+                    hero_transform.translation.x = RIGHT_BOUND;
+                } else {
+                    hero_transform.translation.x += TILE_SIZE;
                 }
             }
         }
@@ -313,9 +314,7 @@ fn handle_hero_arena_transition(
         };
 
         hero_arena_tag.0 = next_arena_id;
-
         state.current_arena = next_arena_id;
-        // TODO Clear out EventTimeline::default(),and set RecordMode::Empty,
         commands.entity(hero_entity).set_parent(new_arena_entity).insert(Transform {
             translation: new_arena_translation,
             ..Default::default()
@@ -369,10 +368,6 @@ fn record_selected_character(
                 RecordMode::Empty => {
                     *hero_record_mode = RecordMode::Recording;
                     info!("RecordMode changed to: Recording");
-                    // Store the initial transform for later
-                    cached_state.previous_transform = *hero_transform;
-                    cached_state.previous_arena = p_arena.clone();
-                    cached_state.record_start_time = Some(time.elapsed_secs_f64());
                 }
                 RecordMode::Recording => {
                     *hero_record_mode = RecordMode::Playback;
@@ -441,15 +436,15 @@ fn timeline_replay_event_system(
     }
 }
 fn clear_timeline_on_record_start(
-    mut query: Query<(&RecordMode, &mut EventTimeline), Changed<RecordMode>>,
+    time: Res<Time>,
+    mut query: Query<(&RecordMode, &mut EventTimeline, &mut CachedState, &mut Transform, &mut ParentArena), Changed<RecordMode>>,
 ) {
-    for (record_mode, mut timeline) in query.iter_mut() {
+    for (record_mode, mut timeline, mut cached_state, mut hero_transform, mut p_arena) in query.iter_mut() {
         if *record_mode == RecordMode::Recording {
             timeline.events.clear();
+            cached_state.previous_transform = *hero_transform;
+            cached_state.previous_arena = p_arena.clone();
+            cached_state.record_start_time = Some(time.elapsed_secs_f64());
         }
     }
 }
-
-
-// Add a ArenasMainTimeline component on the ArenasParent.
-// when you first enter an arena set
