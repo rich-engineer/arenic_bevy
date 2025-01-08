@@ -51,7 +51,7 @@ pub struct CharacterType(pub CharacterTypeEnum);
 
 #[derive(Component)]
 pub struct CharacterClass(pub CharacterClassEnum);
-#[derive(Component)]
+#[derive(Component, Clone, PartialEq, Eq)]
 pub struct ParentArena(pub u8);
 
 #[derive(Component)]
@@ -60,6 +60,15 @@ pub struct CharacterAbilities {
 }
 #[derive(Resource, Default)]
 pub struct CharacterSpawner;
+
+#[derive(Component)]
+pub struct CachedState {
+    pub(crate) previous_transform: Transform,
+    pub(crate) previous_arena: ParentArena,
+    pub(crate) record_start_time: Option<f64>,
+    pub playback_start_time: Option<f64>,
+    pub playback_current_index: usize,
+}
 
 impl Default for CharacterAbilities {
     fn default() -> Self {

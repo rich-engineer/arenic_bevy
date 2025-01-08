@@ -27,6 +27,7 @@ pub const LEFT_COL: [u8; 3] = [0, 3, 6];
 pub const RIGHT_COL: [u8; 3] = [2, 5, 8];
 pub const TOTAL_COLS:u8 = 3;
 pub const TOTAL_ROWS:u8 = 3;
+pub const RECORD_TIME_SECONDS: f64 = 120.0;
 pub const ARENA_CENTER: Vec2 = Vec2::new((ARENA_WIDTH / 2.0) - (TILE_SIZE / 2.0), -((ARENA_HEIGHT / 2.0) - (TILE_SIZE / 2.0)));
 pub const OFFSET_MATRIX: [Vec2; TOTAL_ARENAS_LENGTH] = [
     Vec2::new(-1.0, 1.0),  // 0

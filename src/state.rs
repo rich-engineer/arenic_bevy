@@ -6,6 +6,9 @@ pub struct GlobalState {
     // pub selected_character: Option<Entity>,
     pub current_arena: u8,
     pub active_menu: bool,
+    // TODO Remove these obsolete values
+    pub record_mode: bool,
+    pub selected_characters_cached_transform: Transform,
 }
 impl GlobalState {
     /// Checks if `current_arena` is not present in the given array.
@@ -22,6 +25,8 @@ impl Default for GlobalState {
             // selected_character: None,
             current_arena: 4,
             active_menu: false,
+            record_mode: false,
+            selected_characters_cached_transform: Transform::IDENTITY,
         }
     }
 }

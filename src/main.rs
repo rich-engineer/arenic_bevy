@@ -11,6 +11,7 @@ mod shared_traits;
 mod state;
 mod title;
 mod intro;
+mod events;
 
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;

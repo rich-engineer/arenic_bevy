@@ -9,7 +9,7 @@ pub struct Arena {
     pub id: u8,
 }
 #[derive(Component)]
-pub struct ArenasParentTransform;
+pub struct ArenasParent;
 #[derive(Component)]
 pub struct ArenaBossText;
 
@@ -125,7 +125,7 @@ pub fn get_arena_name_for_id(arena_id: u8) -> String {
 
 pub fn setup_all_arenas(
     mut commands: Commands,
-    parent: Query<Entity, With<ArenasParentTransform>>,
+    parent: Query<Entity, With<ArenasParent>>,
     asset_server: Res<AssetServer>
 ) {
     let parent_entity = if let Ok(entity) = parent.get_single() {
@@ -133,7 +133,7 @@ pub fn setup_all_arenas(
     } else {
         commands
             .spawn((
-                ArenasParentTransform,
+                ArenasParent,
                 Transform::from_xyz(0.0, 0.0, 0.0),
                 InheritedVisibility::default(),
                 GlobalTransform::default(),
