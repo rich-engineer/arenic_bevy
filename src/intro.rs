@@ -1,10 +1,17 @@
-use bevy::prelude::*;
-use crate::arenas::{Arena};
-use crate::characters::{CachedState, CharacterClass, CharacterClassEnum, CharacterName, CharacterType, CharacterTypeEnum, ParentArena};
-use crate::constants::{ARENA_CENTER, ARENA_HEIGHT, ARENA_WIDTH, BOTTOM_BOUND, BOTTOM_ROW, HALF_TILE_SIZE, LEFT_BOUND, LEFT_COL, RECORD_TIME_SECONDS, RIGHT_BOUND, RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW, TOTAL_COLS};
+use crate::arenas::Arena;
+use crate::characters::{
+    CachedState, CharacterClass, CharacterClassEnum, CharacterName, CharacterType,
+    CharacterTypeEnum, ParentArena,
+};
+use crate::constants::{
+    ARENA_CENTER, ARENA_HEIGHT, ARENA_WIDTH, BOTTOM_BOUND, BOTTOM_ROW, HALF_TILE_SIZE, LEFT_BOUND,
+    LEFT_COL, RECORD_TIME_SECONDS, RIGHT_BOUND, RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW,
+    TOTAL_COLS,
+};
 use crate::events::{ActionEnum, ActionEvent, EventTimeline, RecordMode};
 use crate::interactions::KeyboardInput;
 use crate::state::{GameState, GlobalState};
+use bevy::prelude::*;
 
 pub struct IntroPlugin;
 
@@ -13,8 +20,14 @@ impl Plugin for IntroPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<ActionEvent>();
         app.add_systems(OnEnter(GameState::Intro), set_camera_pos);
-        app.add_systems(OnEnter(GameState::Intro), intro_spawn_guildmaster.after(set_camera_pos));
-        app.add_systems(OnEnter(GameState::Intro), select_first_hero_in_current_arena.after(intro_spawn_guildmaster));
+        app.add_systems(
+            OnEnter(GameState::Intro),
+            intro_spawn_guildmaster.after(set_camera_pos),
+        );
+        app.add_systems(
+            OnEnter(GameState::Intro),
+            select_first_hero_in_current_arena.after(intro_spawn_guildmaster),
+        );
         app.add_systems(Update, clear_timeline_on_record_start);
         app.add_systems(
             Update,
@@ -23,12 +36,12 @@ impl Plugin for IntroPlugin {
                 handle_hero_arena_transition,
                 record_selected_character,
                 playback_action_events,
-                timeline_replay_event_system
-            ).chain()
+                timeline_replay_event_system,
+            )
+                .chain(),
         );
     }
 }
-
 
 fn set_camera_pos(mut state: ResMut<GlobalState>) {
     state.current_arena = 8;
@@ -37,17 +50,14 @@ fn intro_spawn_guildmaster(
     mut commands: Commands,
     query: Query<(Entity, &Arena)>,
     asset_server: Res<AssetServer>,
-    state: Res<GlobalState>
+    state: Res<GlobalState>,
 ) {
     let texture = asset_server.load("UI/player_selected.png");
     // info!( state.current_arena);
     if let Some((arena_entity, _)) = query
         .iter()
-        .find(|(_, arena)| {
-            arena.id == state.current_arena
-        })
+        .find(|(_, arena)| arena.id == state.current_arena)
     {
-
         let x = ARENA_CENTER.x;
         let y = ARENA_CENTER.y;
         // TODO()! set CharacterAbilities as a entity using set_parent() to character
@@ -79,7 +89,6 @@ fn intro_spawn_guildmaster(
             .set_parent(arena_entity);
     }
 }
-
 
 /// # References
 /// [Using Tags to Connect and Move Entities in a Parent-Child in ECS](https://stealth-startup.youtrack.cloud/issue/A-1/Using-Tags-to-Connect-and-Move-Entities-in-a-Parent-Child-in-ECS)
@@ -114,8 +123,6 @@ fn select_first_hero_in_current_arena(
     }
 }
 
-
-
 /// # Reference
 /// [Mut Queries](https://stealth-startup.youtrack.cloud/issue/A-3/How-to-Fix-Transform-Mutations-in-Bevy-ECS)
 fn move_selected_hero(
@@ -132,11 +139,13 @@ fn move_selected_hero(
     time: Res<Time>,
 ) {
     // Find hero in current arena
-    let Some((parent_arena, _, mut hero_transform, mut timeline, record_mode, cached_state)) = query
-        .iter_mut()
-        .find(|(p, c, ..)| {
-            p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero
-        }) else { return };
+    let Some((parent_arena, _, mut hero_transform, mut timeline, record_mode, cached_state)) =
+        query
+            .iter_mut()
+            .find(|(p, c, ..)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
+    else {
+        return;
+    };
 
     // Early return if not in correct recording mode
     if !matches!(record_mode, RecordMode::Empty | RecordMode::Recording) {
@@ -144,23 +153,25 @@ fn move_selected_hero(
     }
     // Use `.iter_mut()` to get a mutable iterator
 
-    let should_record = *record_mode == RecordMode::Recording
-        && cached_state.record_start_time.is_some();
+    let should_record =
+        *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
 
     let current_time = cached_state
         .record_start_time
         .map_or(0.0, |start| time.elapsed_secs_f64() - start);
     // Only record events if we're in Recording mode AND have a valid start time
-    let should_record = *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
+    let should_record =
+        *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
     let current_relative_time = if let Some(start) = cached_state.record_start_time {
         time.elapsed_secs_f64() - start
     } else {
         0.0
     };
 
-
     if input.just_pressed(KeyCode::KeyW) {
-        if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW)  {
+        if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE)
+            && state.is_in_current_arena(&TOP_ROW)
+        {
             hero_transform.translation.y = TOP_BOUND;
         } else {
             hero_transform.translation.y += TILE_SIZE;
@@ -174,7 +185,9 @@ fn move_selected_hero(
     }
 
     if input.just_pressed(KeyCode::KeyA) {
-        if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
+        if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE)
+            && state.is_in_current_arena(&LEFT_COL)
+        {
             hero_transform.translation.x = LEFT_BOUND;
         } else {
             hero_transform.translation.x -= TILE_SIZE;
@@ -188,7 +201,9 @@ fn move_selected_hero(
         }
     }
     if input.just_pressed(KeyCode::KeyS) {
-        if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
+        if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE)
+            && state.is_in_current_arena(&BOTTOM_ROW)
+        {
             hero_transform.translation.y = BOTTOM_BOUND;
         } else {
             hero_transform.translation.y -= TILE_SIZE;
@@ -202,13 +217,15 @@ fn move_selected_hero(
         }
     }
     if input.just_pressed(KeyCode::KeyD) {
-        if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
+        if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE)
+            && state.is_in_current_arena(&RIGHT_COL)
+        {
             hero_transform.translation.x = RIGHT_BOUND;
         } else {
             hero_transform.translation.x += TILE_SIZE;
         }
 
-        if should_record{
+        if should_record {
             timeline.events.push(ActionEvent {
                 action: ActionEnum::KeyD,
                 timestamp: current_relative_time,
@@ -234,32 +251,40 @@ fn playback_action_events(
         return;
     }
 
-    for event in event_reader.read()  {
+    for event in event_reader.read() {
         match event.action {
             ActionEnum::KeyW => {
                 // Example: Move up
-                if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW) {
+                if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE)
+                    && state.is_in_current_arena(&TOP_ROW)
+                {
                     hero_transform.translation.y = TOP_BOUND;
                 } else {
                     hero_transform.translation.y += TILE_SIZE;
                 }
             }
             ActionEnum::KeyA => {
-                if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
+                if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE)
+                    && state.is_in_current_arena(&LEFT_COL)
+                {
                     hero_transform.translation.x = LEFT_BOUND;
                 } else {
                     hero_transform.translation.x -= TILE_SIZE;
                 }
             }
             ActionEnum::KeyS => {
-                if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
+                if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE)
+                    && state.is_in_current_arena(&BOTTOM_ROW)
+                {
                     hero_transform.translation.y = BOTTOM_BOUND;
                 } else {
                     hero_transform.translation.y -= TILE_SIZE;
                 }
             }
             ActionEnum::KeyD => {
-                if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
+                if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE)
+                    && state.is_in_current_arena(&RIGHT_COL)
+                {
                     hero_transform.translation.x = RIGHT_BOUND;
                 } else {
                     hero_transform.translation.x += TILE_SIZE;
@@ -275,10 +300,8 @@ fn handle_hero_arena_transition(
     mut arena_query: Query<(Entity, &Arena, &GlobalTransform)>,
     mut state: ResMut<GlobalState>,
 ) {
-
-    let Some((hero_entity, mut hero_arena_tag, hero_type, hero_transform)) = hero_query
-        .iter_mut()
-        .find(|(_, p_arena, ctype, _)| {
+    let Some((hero_entity, mut hero_arena_tag, hero_type, hero_transform)) =
+        hero_query.iter_mut().find(|(_, p_arena, ctype, _)| {
             p_arena.0 == state.current_arena && ctype.0 == CharacterTypeEnum::Hero
         })
     else {
@@ -298,7 +321,7 @@ fn handle_hero_arena_transition(
     } else if hero_y > TOP_BOUND && state.is_current_arena_not_in(&TOP_ROW) {
         new_arena_id = Some(state.current_arena - TOTAL_COLS);
         new_arena_translation = Vec3::new(hero_x, BOTTOM_BOUND, 9.0);
-    } else if hero_y < BOTTOM_BOUND && state.is_current_arena_not_in(&BOTTOM_ROW)  {
+    } else if hero_y < BOTTOM_BOUND && state.is_current_arena_not_in(&BOTTOM_ROW) {
         new_arena_id = Some(state.current_arena + TOTAL_COLS);
         new_arena_translation = Vec3::new(hero_x, TOP_BOUND, 9.0);
     }
@@ -315,10 +338,13 @@ fn handle_hero_arena_transition(
 
         hero_arena_tag.0 = next_arena_id;
         state.current_arena = next_arena_id;
-        commands.entity(hero_entity).set_parent(new_arena_entity).insert(Transform {
-            translation: new_arena_translation,
-            ..Default::default()
-        });
+        commands
+            .entity(hero_entity)
+            .set_parent(new_arena_entity)
+            .insert(Transform {
+                translation: new_arena_translation,
+                ..Default::default()
+            });
     }
 }
 
@@ -337,14 +363,19 @@ fn record_selected_character(
     time: Res<Time>,
 ) {
     // find the hero in the current arena
-    if let Some((_, mut hero_record_mode, p_arena, c_type, mut hero_transform, mut cached_state, mut timeline,)) = query
+    if let Some((
+        _,
+        mut hero_record_mode,
+        p_arena,
+        c_type,
+        mut hero_transform,
+        mut cached_state,
+        mut timeline,
+    )) = query
         .iter_mut()
-        .find(|(_, _, p, c, _, _, _)| {
-            p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero
-        })
+        .find(|(_, _, p, c, _, _, _)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
     {
-
-        if(*hero_record_mode != RecordMode::Empty && cached_state.previous_arena != *p_arena) {
+        if (*hero_record_mode != RecordMode::Empty && cached_state.previous_arena != *p_arena) {
             *hero_record_mode = RecordMode::Empty;
             info!("RecordMode Transitioned because left Arena");
         }
@@ -403,13 +434,14 @@ fn timeline_replay_event_system(
 
         // If playback hasn't started, sort and set playback start
         if cached_state.playback_start_time.is_none() {
-            timeline.events.sort_by(|a, b| a.timestamp.partial_cmp(&b.timestamp).unwrap());
+            timeline
+                .events
+                .sort_by(|a, b| a.timestamp.partial_cmp(&b.timestamp).unwrap());
             cached_state.playback_start_time = Some(time.elapsed_secs_f64());
             cached_state.playback_current_index = 0;
         }
 
         let playback_elapsed = time.elapsed_secs_f64() - cached_state.playback_start_time.unwrap();
-
 
         if playback_elapsed > RECORD_TIME_SECONDS {
             *record_mode = RecordMode::Pending;
@@ -435,9 +467,20 @@ fn timeline_replay_event_system(
 }
 fn clear_timeline_on_record_start(
     time: Res<Time>,
-    mut query: Query<(&RecordMode, &mut EventTimeline, &mut CachedState, &mut Transform, &mut ParentArena), Changed<RecordMode>>,
+    mut query: Query<
+        (
+            &RecordMode,
+            &mut EventTimeline,
+            &mut CachedState,
+            &mut Transform,
+            &mut ParentArena,
+        ),
+        Changed<RecordMode>,
+    >,
 ) {
-    for (record_mode, mut timeline, mut cached_state, mut hero_transform, mut p_arena) in query.iter_mut() {
+    for (record_mode, mut timeline, mut cached_state, mut hero_transform, mut p_arena) in
+        query.iter_mut()
+    {
         if *record_mode == RecordMode::Recording {
             info!("************************************a");
             timeline.events.clear();

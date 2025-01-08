@@ -4,24 +4,23 @@ mod arenas;
 mod cameras;
 mod characters;
 mod constants;
+mod events;
 mod global_chat;
 mod hud;
 mod interactions;
+mod intro;
 mod shared_traits;
 mod state;
 mod title;
-mod intro;
-mod events;
 
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;
 use cameras::CamerasPlugin;
+use constants::RESOLUTION;
 use hud::HUDPlugin;
+use intro::IntroPlugin;
 use state::StatePlugin;
 use title::TitlePlugin;
-use intro::IntroPlugin;
-use constants::RESOLUTION;
-
 
 fn main() {
     App::new()

@@ -24,7 +24,7 @@ pub enum RecordMode {
     Empty,
     Recording,
     Playback,
-    Pending
+    Pending,
 }
 
 impl Default for RecordMode {

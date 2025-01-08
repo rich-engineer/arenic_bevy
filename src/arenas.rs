@@ -1,5 +1,8 @@
 use crate::characters::CharacterClassEnum;
-use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE, TOTAL_ARENAS_LENGTH};
+use crate::constants::{
+    ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE,
+    TOTAL_ARENAS_LENGTH,
+};
 use crate::shared_traits::EnumDisplay;
 use crate::state::GlobalState;
 use bevy::prelude::*;
@@ -126,7 +129,7 @@ pub fn get_arena_name_for_id(arena_id: u8) -> String {
 pub fn setup_all_arenas(
     mut commands: Commands,
     parent: Query<Entity, With<ArenasParent>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
     let parent_entity = if let Ok(entity) = parent.get_single() {
         entity
@@ -162,7 +165,7 @@ pub fn setup_all_arenas(
 
         commands
             .spawn((
-                Arena { id: arena_id, },
+                Arena { id: arena_id },
                 ArenaName(get_arena_name_for_id(arena_id)),
                 Transform::from_xyz(start_x, start_y, 0.0),
                 InheritedVisibility::default(),

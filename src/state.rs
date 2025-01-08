@@ -36,9 +36,8 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<GlobalState>().init_state::<GameState>();
-            // .add_systems(Update, log_state_changes);
-            // Add our system to run whenever GameState changes
-
+        // .add_systems(Update, log_state_changes);
+        // Add our system to run whenever GameState changes
     }
 }
 

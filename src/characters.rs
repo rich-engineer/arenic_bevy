@@ -78,10 +78,6 @@ impl Default for CharacterAbilities {
     }
 }
 
-
-
-
-
 // pub fn intro_gm_hunter() {
 // let guild_chat = vec!["Approaches the lone figure near the Guild House entrance"];
 // let guild_master = vec![

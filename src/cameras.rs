@@ -13,11 +13,7 @@ impl Plugin for CamerasPlugin {
         app.add_systems(Startup, setup_camera);
         app.add_systems(
             Update,
-            (
-                handle_camera_input,
-            ).run_if(not(
-                in_state(GameState::Title)
-            )),
+            (handle_camera_input,).run_if(not(in_state(GameState::Title))),
         );
         app.add_systems(Update, update_camera.after(handle_camera_input));
     }
