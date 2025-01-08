@@ -18,9 +18,10 @@ use cameras::CamerasPlugin;
 use hud::HUDPlugin;
 use state::StatePlugin;
 use title::TitlePlugin;
-use crate::intro::IntroPlugin;
+use intro::IntroPlugin;
+use constants::RESOLUTION;
 
-const RESOLUTION: (f32, f32) = (1280.0, 720.0);
+
 fn main() {
     App::new()
         .add_plugins(

@@ -7,12 +7,20 @@ pub struct GlobalState {
     pub current_arena: u8,
     pub active_menu: bool,
 }
-
+impl GlobalState {
+    /// Checks if `current_arena` is not present in the given array.
+    pub fn is_current_arena_not_in(&self, arr: &[u8; 3]) -> bool {
+        !arr.contains(&self.current_arena)
+    }
+    pub fn is_in_current_arena(&self, arr: &[u8; 3]) -> bool {
+        arr.contains(&self.current_arena)
+    }
+}
 impl Default for GlobalState {
     fn default() -> Self {
         Self {
             // selected_character: None,
-            current_arena: 0,
+            current_arena: 4,
             active_menu: false,
         }
     }

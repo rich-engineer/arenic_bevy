@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::arenas::{Arena};
 use crate::characters::{CharacterClass, CharacterClassEnum, CharacterName, CharacterType, CharacterTypeEnum, ParentArena};
-use crate::constants::{ARENA_CENTER, TILE_SIZE};
+use crate::constants::{ARENA_CENTER, ARENA_HEIGHT, ARENA_WIDTH, BOTTOM_BOUND, BOTTOM_ROW, HALF_TILE_SIZE, LEFT_BOUND, LEFT_COL, RIGHT_BOUND, RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW, TOTAL_COLS};
 use crate::interactions::KeyboardInput;
 use crate::state::{GameState, GlobalState};
 
@@ -12,11 +12,13 @@ impl Plugin for IntroPlugin {
         app.add_systems(OnEnter(GameState::Intro), set_camera_pos);
         app.add_systems(OnEnter(GameState::Intro), intro_spawn_guildmaster.after(set_camera_pos));
         app.add_systems(OnEnter(GameState::Intro), select_first_hero_in_current_arena.after(intro_spawn_guildmaster));
-        app.add_systems(Update, move_selected_hero);
+        app.add_systems(Update, (move_selected_hero, handle_hero_arena_transition));
     }
 }
+
+
 fn set_camera_pos(mut state: ResMut<GlobalState>) {
-    state.current_arena = 4;
+    state.current_arena = 8;
 }
 fn intro_spawn_guildmaster(
     mut commands: Commands,
@@ -104,25 +106,95 @@ fn move_selected_hero(
         .iter_mut()
         .find(|(_, p, c, _)| p.0 == state.current_arena && c.0 == CharacterTypeEnum::Hero)
     {
+
         if input.just_pressed(KeyCode::KeyW) {
-            // Now this compiles—mutable access to Transform
-            hero_transform.translation.y += TILE_SIZE;
+            if hero_transform.translation.y >= (TOP_BOUND - TILE_SIZE) && state.is_in_current_arena(&TOP_ROW)  {
+                hero_transform.translation.y = TOP_BOUND;
+            } else {
+                hero_transform.translation.y += TILE_SIZE;
+            }
+
         }
 
         if input.just_pressed(KeyCode::KeyA) {
-            // Now this compiles—mutable access to Transform
-            hero_transform.translation.x -= TILE_SIZE;
+            if hero_transform.translation.x < (LEFT_BOUND + TILE_SIZE) && state.is_in_current_arena(&LEFT_COL) {
+                hero_transform.translation.x = LEFT_BOUND;
+            } else {
+                hero_transform.translation.x -= TILE_SIZE;
+            }
         }
-
         if input.just_pressed(KeyCode::KeyS) {
-            // Now this compiles—mutable access to Transform
-            hero_transform.translation.y -= TILE_SIZE;
+            if hero_transform.translation.y < (BOTTOM_BOUND + TILE_SIZE) && state.is_in_current_arena(&BOTTOM_ROW) {
+                hero_transform.translation.y = BOTTOM_BOUND;
+            } else {
+                hero_transform.translation.y -= TILE_SIZE;
+            }
         }
-
         if input.just_pressed(KeyCode::KeyD) {
-            // Now this compiles—mutable access to Transform
-            hero_transform.translation.x += TILE_SIZE;
+            if hero_transform.translation.x > (RIGHT_BOUND - TILE_SIZE) && state.is_in_current_arena(&RIGHT_COL) {
+                hero_transform.translation.x = RIGHT_BOUND;
+            } else {
+                hero_transform.translation.x += TILE_SIZE;
+            }
         }
+    }
+}
+
+fn handle_hero_arena_transition(
+    mut commands: Commands,
+    mut hero_query: Query<(Entity, &mut ParentArena, &CharacterType, &Transform)>,
+    mut arena_query: Query<(Entity, &Arena, &GlobalTransform)>,
+    mut state: ResMut<GlobalState>,
+) {
+
+    let Some((hero_entity, mut hero_arena_tag, hero_type, hero_transform)) = hero_query
+        .iter_mut()
+        .find(|(_, p_arena, ctype, _)| {
+            p_arena.0 == state.current_arena && ctype.0 == CharacterTypeEnum::Hero
+        })
+    else {
+        return;
+    };
+    let hero_x = hero_transform.translation.x;
+    let hero_y = hero_transform.translation.y;
+
+
+    let mut new_arena_translation = Vec3::new(0.0, 0.0, 9.0);
+
+    let mut new_arena_id = None;
+    if hero_x < LEFT_BOUND && state.is_current_arena_not_in(&LEFT_COL) {
+        new_arena_id = Some(state.current_arena - 1);
+        new_arena_translation = Vec3::new(RIGHT_BOUND - TILE_SIZE, hero_y, 9.0);
+    } else if hero_x > (RIGHT_BOUND - TILE_SIZE) && state.is_current_arena_not_in(&RIGHT_COL) {
+        new_arena_id = Some(state.current_arena + 1);
+        new_arena_translation = Vec3::new(LEFT_BOUND, hero_y, 9.0);
+    } else if hero_y > TOP_BOUND && state.is_current_arena_not_in(&TOP_ROW) {
+        new_arena_id = Some(state.current_arena - TOTAL_COLS);
+        new_arena_translation = Vec3::new(hero_x, BOTTOM_BOUND, 9.0);
+    } else if hero_y < BOTTOM_BOUND && state.is_current_arena_not_in(&BOTTOM_ROW)  {
+        new_arena_id = Some(state.current_arena + TOTAL_COLS);
+        new_arena_translation = Vec3::new(hero_x, TOP_BOUND, 9.0);
+    }
+
+    if let Some(next_arena_id) = new_arena_id {
+        // Find the new arena entity
+        let Some((new_arena_entity, _, _)) = arena_query
+            .iter_mut()
+            .find(|(_, arena, _)| arena.id == next_arena_id)
+        else {
+            warn!("No arena found with id = {next_arena_id}");
+            return;
+        };
+
+        hero_arena_tag.0 = next_arena_id;
+
+        state.current_arena = next_arena_id;
+
+        commands.entity(hero_entity).set_parent(new_arena_entity).insert(Transform {
+            translation: new_arena_translation,
+            ..Default::default()
+        });
+
     }
 }
 
