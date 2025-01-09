@@ -1,11 +1,10 @@
-use bevy::prelude::*;
 use crate::arena_components::Arena;
 use crate::state::{GameState, GlobalState};
+use bevy::prelude::*;
 
 pub struct IntroPlugin;
 
 impl Plugin for IntroPlugin {
-
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Intro), set_camera_pos);
         app.add_systems(

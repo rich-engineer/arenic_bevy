@@ -1,11 +1,13 @@
-use bevy::prelude::*;
+use crate::arena_components::{
+    Arena, ArenaBossText, ArenaName, ArenasParent, Bastion, Casino, Crucible, Gala, GuildHouse,
+    Labyrinth, Mountain, Pawnshop, Sanctum, SelectedHero,
+};
 use crate::constants::{
     ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE,
 };
-use crate::shared_traits::{ComponentDisplay};
+use crate::shared_traits::ComponentDisplay;
 use crate::state::GlobalState;
-use crate::arena_components::{Arena, ArenaBossText, ArenaName, ArenasParent, Bastion, Casino, Crucible, Gala, GuildHouse, Labyrinth, Mountain, Pawnshop, Sanctum, SelectedHero};
-
+use bevy::prelude::*;
 
 fn update_arena_boss_text(
     mut query: Query<&mut Text, With<ArenaBossText>>,
@@ -62,7 +64,7 @@ pub fn setup_all_arenas(
             ))
             .id()
     };
-    
+
     let get_position = |index: usize| -> Vec3 {
         let offset = OFFSET_MATRIX[index];
         let start_x = -(ARENA_WIDTH / 2.0) + (TILE_SIZE / 2.0) + (ARENA_WIDTH * offset.x);
@@ -71,103 +73,122 @@ pub fn setup_all_arenas(
     };
     let texture = asset_server.load("UI/default_tile.png");
 
-    commands.spawn((
-        Labyrinth,
-        Transform::from_translation(get_position(0)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Labyrinth.to_display_string()),
-        Arena { id: 0 },
-        SelectedHero(None),
-    )).set_parent(parent_entity)
+    commands
+        .spawn((
+            Labyrinth,
+            Transform::from_translation(get_position(0)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Labyrinth.to_display_string()),
+            Arena { id: 0 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
         .with_children(|parent| setup_tiles(parent, texture.clone()));
 
+    commands
+        .spawn((
+            GuildHouse,
+            Transform::from_translation(get_position(1)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(GuildHouse.to_display_string()),
+            Arena { id: 1 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
-    commands.spawn((
-        GuildHouse,
-        Transform::from_translation(get_position(1)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(GuildHouse.to_display_string()),
-        Arena { id: 1 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
-    
-    commands.spawn((
-        Casino,
-        Transform::from_translation(get_position(2)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Sanctum.to_display_string()),
-        Arena { id: 2 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
+    commands
+        .spawn((
+            Casino,
+            Transform::from_translation(get_position(2)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Sanctum.to_display_string()),
+            Arena { id: 2 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
+    commands
+        .spawn((
+            Mountain,
+            Transform::from_translation(get_position(3)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Mountain.to_display_string()),
+            Arena { id: 3 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
-    commands.spawn((
-        Mountain,
-        Transform::from_translation(get_position(3)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Mountain.to_display_string()),
-        Arena { id: 3 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
+    commands
+        .spawn((
+            Bastion,
+            Transform::from_translation(get_position(4)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Bastion.to_display_string()),
+            Arena { id: 4 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
+    commands
+        .spawn((
+            Pawnshop,
+            Transform::from_translation(get_position(5)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Pawnshop.to_display_string()),
+            Arena { id: 5 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
-    commands.spawn((
-        Bastion,
-        Transform::from_translation(get_position(4)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Bastion.to_display_string()),
-        Arena { id: 4 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
+    commands
+        .spawn((
+            Crucible,
+            Transform::from_translation(get_position(6)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Crucible.to_display_string()),
+            Arena { id: 6 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
+    commands
+        .spawn((
+            Casino,
+            Transform::from_translation(get_position(7)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Casino.to_display_string()),
+            Arena { id: 7 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 
-    commands.spawn((
-        Pawnshop,
-        Transform::from_translation(get_position(5)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Pawnshop.to_display_string()),
-        Arena { id: 5 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
-
-
-    commands.spawn((
-        Crucible,
-        Transform::from_translation(get_position(6)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Crucible.to_display_string()),
-        Arena { id: 6 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
-
-
-    commands.spawn((
-        Casino,
-        Transform::from_translation(get_position(7)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Casino.to_display_string()),
-        Arena { id: 7 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
-
-
-    commands.spawn((
-        Gala,
-        Transform::from_translation(get_position(8)),
-        GlobalTransform::default(),
-        InheritedVisibility::default(),
-        ArenaName(Gala.to_display_string()),
-        Arena { id: 8 },
-        SelectedHero(None),
-    )).set_parent(parent_entity).with_children(|parent| setup_tiles(parent, texture.clone()));
+    commands
+        .spawn((
+            Gala,
+            Transform::from_translation(get_position(8)),
+            GlobalTransform::default(),
+            InheritedVisibility::default(),
+            ArenaName(Gala.to_display_string()),
+            Arena { id: 8 },
+            SelectedHero(None),
+        ))
+        .set_parent(parent_entity)
+        .with_children(|parent| setup_tiles(parent, texture.clone()));
 }
 
 pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
@@ -186,8 +207,6 @@ pub fn setup_tiles(commands: &mut ChildBuilder, texture: Handle<Image>) {
         }
     }
 }
-
-
 
 pub struct ArenaPlugin;
 

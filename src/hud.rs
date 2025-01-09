@@ -1,3 +1,4 @@
+use crate::arena_components::ArenaBossText;
 use crate::constants::{FONT_SIZE, PROGRESS_BAR_HEIGHT};
 use crate::state::GameState;
 use bevy::app::{App, Plugin};
@@ -6,7 +7,6 @@ use bevy::color::palettes::tailwind::{GRAY_400, GRAY_50, GRAY_950, RED_400};
 use bevy::color::Color;
 use bevy::hierarchy::{ChildBuild, ChildBuilder};
 use bevy::prelude::*;
-use crate::arena_components::ArenaBossText;
 
 pub struct HUDPlugin;
 

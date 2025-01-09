@@ -1,5 +1,5 @@
-use bevy::prelude::{Component, Entity};
 use crate::shared_traits::ComponentDisplay;
+use bevy::prelude::{Component, Entity};
 
 #[derive(Component)]
 pub struct Labyrinth;
@@ -24,7 +24,6 @@ pub struct Gala;
 pub struct GuildHouse;
 #[derive(Component)]
 pub struct Menu;
-
 
 // Implement the ComponentDisplay trait for each component
 impl ComponentDisplay for Labyrinth {
@@ -86,7 +85,6 @@ impl ComponentDisplay for Menu {
         "---".to_string()
     }
 }
-
 
 #[derive(Component, Debug)]
 pub struct Arena {
