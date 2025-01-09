@@ -107,7 +107,7 @@ impl Plugin for TitlePlugin {
 fn cleanup_title(mut commands: Commands, query: Query<Entity, With<TitleScreenUI>>) {
     for entity in &query {
         // Remove this entity and all its children
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).despawn();
     }
 }
 

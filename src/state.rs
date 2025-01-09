@@ -1,4 +1,4 @@
-use crate::arenas::ArenaNameEnum;
+
 use bevy::prelude::*;
 
 #[derive(Resource)]
@@ -44,7 +44,6 @@ pub enum GameState {
 
     Intro,
     Menu,
-    Arena(ArenaNameEnum),
     Rotate,
     Roster,
     Gacha,

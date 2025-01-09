@@ -12,15 +12,17 @@ mod intro;
 mod shared_traits;
 mod state;
 mod title;
+mod arena_components;
 
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;
 use cameras::CamerasPlugin;
 use constants::RESOLUTION;
 use hud::HUDPlugin;
-use intro::IntroPlugin;
+// use intro::IntroPlugin;
 use state::StatePlugin;
 use title::TitlePlugin;
+use crate::intro::IntroPlugin;
 
 fn main() {
     App::new()
