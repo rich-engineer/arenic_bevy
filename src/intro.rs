@@ -33,12 +33,12 @@ impl Plugin for IntroPlugin {
         app.add_systems(
             Update,
             (
-                // cycle_hero_selection
                 move_selected_hero,
                 handle_hero_arena_transition,
                 record_selected_character,
                 playback_action_events,
                 timeline_replay_event_system,
+                cycle_hero_selection,
             )
                 .chain(),
         );
@@ -276,6 +276,57 @@ fn move_selected_hero(
             });
         }
     }
+}
+
+
+fn cycle_hero_selection(
+    mut commands: Commands,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    // Query to find current arena and its selected hero
+    arena_query: Query<(Entity, &Arena, &SelectedHero)>,
+    // Query to find all heroes in the current arena
+    heroes_query: Query<(Entity, &ParentArena), With<CharacterType>>,
+    mut state: ResMut<GlobalState>,
+    asset_server: Res<AssetServer>,
+) {
+    // Only run this system when Tab is pressed
+    if !keyboard.just_pressed(KeyCode::Tab) {
+        return;
+    }
+
+    // Find the current arena
+    let Some((arena_entity, arena, selected_hero)) = arena_query
+        .iter()
+        .find(|(_, arena, _)| arena.id == state.current_arena)
+    else {
+        return;
+    };
+
+    // Get all heroes in current arena
+    let heroes: Vec<Entity> = heroes_query
+        .iter()
+        .filter(|(_, parent_arena)| parent_arena.0 == arena.id)
+        .map(|(entity, _)| entity)
+        .collect();
+
+    // If there are no heroes, return early
+    if heroes.is_empty() {
+        return;
+    }
+
+    // Find index of currently selected hero
+    let current_index = if let Some(current_hero) = selected_hero.0 {
+        heroes.iter().position(|&e| e == current_hero).unwrap_or(0)
+    } else {
+        0
+    };
+    info!("Pressed Tab {} ", current_index);
+    // Calculate next index, wrapping around to 0 if we reach the end
+    let next_index = (current_index + 1) % heroes.len();
+    let next_hero = heroes[next_index];
+
+    commands.entity(arena_entity).insert(SelectedHero(Some(next_hero)));
+
 }
 
 fn playback_action_events(
