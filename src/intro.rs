@@ -1,8 +1,5 @@
 use crate::arenas::{Arena, SelectedHero};
-use crate::characters::{
-    CachedState, CharacterClass, CharacterClassEnum, CharacterName, CharacterType,
-    CharacterTypeEnum, ParentArena,
-};
+use crate::characters::{CachedState, CharacterClass, CharacterClassEnum, CharacterName, CharacterType, CharacterTypeEnum, ParentArena, Selected};
 use crate::constants::{
     ARENA_CENTER, ARENA_HEIGHT, ARENA_WIDTH, BOTTOM_BOUND, BOTTOM_ROW, HALF_TILE_SIZE, LEFT_BOUND,
     LEFT_COL, RECORD_TIME_SECONDS, RIGHT_BOUND, RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW,
@@ -79,6 +76,7 @@ fn intro_spawn_guildmaster_and_recruit(
                 custom_size: Some(Vec2::new(19.0, 19.0)),
                 ..default()
             },
+            Selected,
             EventTimeline::default(),
             RecordMode::Empty,
             CachedState {
@@ -90,8 +88,6 @@ fn intro_spawn_guildmaster_and_recruit(
             },
         ))
         .set_parent(arena_entity).id();
-
-    commands.entity(arena_entity).insert(SelectedHero(Some(guildmaster_entity)));
 
     commands
         .spawn((
@@ -130,7 +126,7 @@ fn select_first_hero_in_current_arena(
     asset_server: Res<AssetServer>,
 ) {
     // Load the texture used for the hero selection marker
-    let selection_texture = asset_server.load("UI/player_selected.png");
+    // let selection_texture = asset_server.load("UI/player_selected.png");
 
     // Find the arena whose ID matches the current arena
     let Some((arena_entity, _, selected_hero)) = arena_query
@@ -141,35 +137,35 @@ fn select_first_hero_in_current_arena(
     };
 
     // If there's already a selected hero, use that; otherwise pick the first available hero
-    let hero_to_highlight = if let Some(hero_entity) = selected_hero.0 {
-        hero_entity
-    } else if let Some(first_hero) = hero_query.iter().next() {
-        commands.entity(arena_entity).insert(SelectedHero(Some(first_hero)));
-        first_hero
-    } else {
-        // No heroes to select
-        return;
-    };
-
-    // Spawn the marker as a child of the selected hero
-    commands
-        .spawn((
-            Transform::from_xyz(0.0, 0.0, -1.0),
-            GlobalTransform::default(),
-            Sprite {
-                image: selection_texture,
-                color: Color::srgba(0.0, 0.0, 0.0, 0.25),
-                custom_size: Some(Vec2::new(24.0, 24.0)),
-                ..default()
-            },
-        ))
-        .set_parent(hero_to_highlight);
+    // let hero_to_highlight = if let Some(hero_entity) = selected_hero.0 {
+    //     hero_entity
+    // } else if let Some(first_hero) = hero_query.iter().next() {
+    //     first_hero
+    // } else {
+    //     // No heroes to select
+    //     return;
+    // };
+    //
+    // // Spawn the marker as a child of the selected hero
+    // commands
+    //     .spawn((
+    //         Transform::from_xyz(0.0, 0.0, -1.0),
+    //         GlobalTransform::default(),
+    //         Sprite {
+    //             image: selection_texture,
+    //             color: Color::srgba(0.0, 0.0, 0.0, 0.25),
+    //             custom_size: Some(Vec2::new(24.0, 24.0)),
+    //             ..default()
+    //         },
+    //     ))
+    //     .set_parent(hero_to_highlight);
 }
 
 
 /// # Reference
 /// [Mut Queries](https://stealth-startup.youtrack.cloud/issue/A-3/How-to-Fix-Transform-Mutations-in-Bevy-ECS)
 fn move_selected_hero(
+    mut commands: Commands,
     mut query: Query<(
         &ParentArena,
         &CharacterType,
@@ -177,7 +173,8 @@ fn move_selected_hero(
         &mut EventTimeline,
         &RecordMode,
         &CachedState,
-    )>,
+
+    ), With<Selected>>,
     state: Res<GlobalState>,
     input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
@@ -195,14 +192,7 @@ fn move_selected_hero(
     if !matches!(record_mode, RecordMode::Empty | RecordMode::Recording) {
         return;
     }
-    // Use `.iter_mut()` to get a mutable iterator
 
-    let should_record =
-        *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
-
-    let current_time = cached_state
-        .record_start_time
-        .map_or(0.0, |start| time.elapsed_secs_f64() - start);
     // Only record events if we're in Recording mode AND have a valid start time
     let should_record =
         *record_mode == RecordMode::Recording && cached_state.record_start_time.is_some();
@@ -324,13 +314,14 @@ fn cycle_hero_selection(
     // Calculate next index, wrapping around to 0 if we reach the end
     let next_index = (current_index + 1) % heroes.len();
     let next_hero = heroes[next_index];
-
-    commands.entity(arena_entity).insert(SelectedHero(Some(next_hero)));
-
+    for hero in heroes.iter() {
+        commands.entity(*hero).remove::<Selected>();
+    }
+    commands.entity(next_hero).insert(Selected);
 }
 
 fn playback_action_events(
-    mut query: Query<(&mut Transform, &RecordMode), With<CharacterClass>>,
+    mut query: Query<(&mut Transform, &RecordMode), With<Selected>>,
     mut event_reader: EventReader<ActionEvent>,
     state: Res<GlobalState>,
 ) {

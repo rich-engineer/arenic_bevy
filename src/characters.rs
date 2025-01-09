@@ -53,6 +53,8 @@ pub struct CharacterType(pub CharacterTypeEnum);
 pub struct CharacterClass(pub CharacterClassEnum);
 #[derive(Component, Clone, PartialEq, Eq)]
 pub struct ParentArena(pub u8);
+#[derive(Component)]
+pub struct Selected;
 
 #[derive(Component)]
 pub struct CharacterAbilities {
