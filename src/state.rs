@@ -5,6 +5,7 @@ pub struct GlobalState {
     // pub selected_character: Option<Entity>,
     pub current_arena: u8,
     pub active_menu: bool,
+    pub selected_hero_by_arena: [Option<Entity>; 8],
 }
 impl GlobalState {
     /// Checks if `current_arena` is not present in the given array.
@@ -21,6 +22,7 @@ impl Default for GlobalState {
             // selected_character: None,
             current_arena: 4,
             active_menu: false,
+            selected_hero_by_arena: [None; 8],
         }
     }
 }
@@ -40,7 +42,6 @@ impl Plugin for StatePlugin {
 pub enum GameState {
     #[default]
     Title,
-
     Intro,
     Menu,
     Rotate,

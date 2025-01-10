@@ -13,6 +13,7 @@ mod intro;
 mod shared_traits;
 mod state;
 mod title;
+mod character_components;
 
 use abilities::AbilitiesPlugin;
 use arenas::ArenaPlugin;

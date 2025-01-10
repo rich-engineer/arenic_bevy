@@ -1,14 +1,7 @@
-use crate::abilities::AbilitySpawner;
-use crate::interactions::KeyBindingsForAbility;
 use crate::shared_traits::EnumDisplay;
 use bevy::prelude::*;
 
-#[derive(PartialEq)]
-pub enum CharacterTypeEnum {
-    Hero,
-    Boss,
-    Mob,
-}
+
 
 #[derive(PartialEq, Eq)]
 #[allow(dead_code)]
@@ -47,14 +40,10 @@ impl EnumDisplay for CharacterClassEnum {
 pub struct CharacterName(pub String);
 
 #[derive(Component)]
-pub struct CharacterType(pub CharacterTypeEnum);
-
-#[derive(Component)]
 pub struct CharacterClass(pub CharacterClassEnum);
 #[derive(Component, Clone, PartialEq, Eq)]
 pub struct ParentArena(pub u8);
-#[derive(Component)]
-pub struct Selected;
+
 
 #[derive(Component)]
 pub struct CharacterAbilities {
