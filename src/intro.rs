@@ -21,33 +21,51 @@ impl Plugin for IntroPlugin {
                 set_arenas_active_or_inactive
                     .after(intro_spawn_guildmaster_and_recruit)
                     .run_if(in_state(GameState::Intro)),
-                cycle_selected_hero_system
-                    .after(set_arenas_active_or_inactive)
-                    .run_if(in_state(GameState::Intro)),
-                update_shadow_visibility
-                    .after(cycle_selected_hero_system)
-                    .run_if(in_state(GameState::Intro))
+                // cycle_selected_hero_system
+                //     .after(set_arenas_active_or_inactive)
+                //     .run_if(in_state(GameState::Intro)),
+                // update_shadow_visibility
+                //     .after(cycle_selected_hero_system)
+                //     .run_if(in_state(GameState::Intro))
             ).chain()
         );
 
     }
 }
 fn set_camera_intro_arena(
-    mut state: ResMut<GlobalState>
+    mut commands: Commands,
+    active_arena_query: Query<(Entity, &Arena), With<ActiveArena>>,
+    guild_house: Query<Entity, With<GuildHouse>>,
 ) {
-    state.current_arena = 1;
+    if let Ok(gh_entity) = guild_house.get_single() {
+        if active_arena_query.get_single().is_err() {
+            warn!("No active Arena Inserting GuildHouse.");
+            commands.entity(gh_entity).insert(ActiveArena);
+        }
+    } else {
+        warn!("No active Guild House Created");
+    }
 }
+
 fn set_arenas_active_or_inactive(
     mut commands: Commands,
     arenas_query: Query<(Entity, &Arena), With<Arena>>,
-    state: ResMut<GlobalState>
+    active_arena_query: Query<(Entity, &Arena), With<ActiveArena>>,
 ) {
-    for (entity, arena) in arenas_query.iter() {
-        commands.entity(entity).remove::<ActiveArena>();
-
-        if (arena.id == state.current_arena) {
-            commands.entity(entity).insert(ActiveArena);
+    if let Ok((active_entity, active_arena)) = active_arena_query.get_single() {
+        for (entity, arena) in arenas_query.iter() {
+            if arena.id == active_arena.id {
+                // Add ActiveArena only if it is not already present
+                if entity != active_entity {
+                    commands.entity(entity).insert(ActiveArena);
+                }
+            } else {
+                // Remove ActiveArena from non-matching entities
+                commands.entity(entity).remove::<ActiveArena>();
+            }
         }
+    } else {
+        warn!("All Arenas are Inactive");
     }
 }
 
@@ -74,7 +92,6 @@ fn intro_spawn_guildmaster_and_recruit(
             CharacterName("Dean".to_string()),
             Hero,
             GuildMaster,
-            ParentArena(state.current_arena),
             Sprite {
                 image: texture.clone(),
                 custom_size: Some(Vec2::new(19.0, 19.0)),
@@ -138,63 +155,63 @@ fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>) {
 }
 
 
-pub fn cycle_selected_hero_system(
-    input: Res<ButtonInput<KeyCode>>,
-    mut commands: Commands,
-    heroes_query: Query<(Entity, &ParentArena, Option<&Selected>), With<Hero>>,
-    mut state: ResMut<GlobalState>,
-) {
-    // --- 4. Find the arena that matches `state.current_arena` ---
-    let selected_arena_id = state.current_arena;
-    
-
-    // --- 5. Gather all heroes that belong to the selected arena ---
-    //    (i.e., heroes whose `ParentArena.0 == selected_arena_id`)
-    let arena_heroes: Vec<(Entity, bool)> = heroes_query
-        .iter()
-        .filter_map(|(hero_entity, parent_arena, selected)| {
-            if parent_arena.0 == selected_arena_id {
-                Some((hero_entity, selected.is_some()))
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    // If there are no heroes in this arena, no need to do anything.
-    if arena_heroes.is_empty() {
-        info!("Selected {} has No arena_heroes", selected_arena_id);
-        return;
-    }
-
-    // --- 7. On `Tab` press, cycle selection among `arena_heroes` ---
-    if input.just_pressed(KeyCode::Tab) {
-        // Find which hero is currently selected (if any).
-        let selected_index = arena_heroes
-            .iter()
-            .position(|(_, is_selected)| *is_selected);
-
-        match selected_index {
-            Some(idx) => {
-                // Remove Selected from the current hero
-                commands.entity(arena_heroes[idx].0).remove::<Selected>();
-
-                // Cycle to next hero in the list
-                let next_idx = (idx + 1) % arena_heroes.len();
-
-                // Add Selected to the next hero
-                let hero = commands.entity(arena_heroes[next_idx].0).insert(Selected).id();
-                state.selected_hero_by_arena[selected_arena_id as usize] = Some(hero);
-            }
-            None => {
-                let hero = arena_heroes[0].0;
-                commands.entity(hero).insert(Selected);
-                // Don't forget to update the state here too
-                state.selected_hero_by_arena[selected_arena_id as usize] = Some(hero);
-            }
-        }
-    }
-}
+// pub fn cycle_selected_hero_system(
+//     input: Res<ButtonInput<KeyCode>>,
+//     mut commands: Commands,
+//     heroes_query: Query<(Entity, &ParentArena, Option<&Selected>), With<Hero>>,
+//     mut state: ResMut<GlobalState>,
+// ) {
+//     // --- 4. Find the arena that matches `state.current_arena` ---
+//     let selected_arena_id = state.current_arena;
+//
+//
+//     // --- 5. Gather all heroes that belong to the selected arena ---
+//     //    (i.e., heroes whose `ParentArena.0 == selected_arena_id`)
+//     let arena_heroes: Vec<(Entity, bool)> = heroes_query
+//         .iter()
+//         .filter_map(|(hero_entity, parent_arena, selected)| {
+//             if parent_arena.0 == selected_arena_id {
+//                 Some((hero_entity, selected.is_some()))
+//             } else {
+//                 None
+//             }
+//         })
+//         .collect();
+//
+//     // If there are no heroes in this arena, no need to do anything.
+//     if arena_heroes.is_empty() {
+//         info!("Selected {} has No arena_heroes", selected_arena_id);
+//         return;
+//     }
+//
+//     // --- 7. On `Tab` press, cycle selection among `arena_heroes` ---
+//     if input.just_pressed(KeyCode::Tab) {
+//         // Find which hero is currently selected (if any).
+//         let selected_index = arena_heroes
+//             .iter()
+//             .position(|(_, is_selected)| *is_selected);
+//
+//         match selected_index {
+//             Some(idx) => {
+//                 // Remove Selected from the current hero
+//                 commands.entity(arena_heroes[idx].0).remove::<Selected>();
+//
+//                 // Cycle to next hero in the list
+//                 let next_idx = (idx + 1) % arena_heroes.len();
+//
+//                 // Add Selected to the next hero
+//                 let hero = commands.entity(arena_heroes[next_idx].0).insert(Selected).id();
+//                 state.selected_hero_by_arena[selected_arena_id as usize] = Some(hero);
+//             }
+//             None => {
+//                 let hero = arena_heroes[0].0;
+//                 commands.entity(hero).insert(Selected);
+//                 // Don't forget to update the state here too
+//                 state.selected_hero_by_arena[selected_arena_id as usize] = Some(hero);
+//             }
+//         }
+//     }
+// }
 
 fn update_shadow_visibility(
     mut shadow_query: Query<(&Parent, &mut Visibility), With<SelectedShadow>>,
