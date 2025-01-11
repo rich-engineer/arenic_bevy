@@ -95,7 +95,6 @@ rustc 1.84.0-nightly (03ee48451 2024-11-18)
   ```
 - **Build & Serve WASM**:
   ```bash
-  cargo build --release --target wasm32-unknown-unknown
   trunk serve
   ```
 - **Task Management**:  
