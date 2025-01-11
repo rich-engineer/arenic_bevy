@@ -9,7 +9,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Arenic".to_string(),
+                        title: "A R E N I C".to_string(),
                         resolution: RESOLUTION.into(),
                         resizable: false,
                         ..Default::default()

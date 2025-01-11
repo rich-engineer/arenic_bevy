@@ -80,6 +80,11 @@ From **arena** (sand, enclosed area) + **-ic** suffix, meaning “of or relating
 ---
 
 ## Development Tools & Commands
+- **Ensure you're on nightly**
+```bash
+rustc --version
+rustc 1.84.0-nightly (03ee48451 2024-11-18)
+```
 - **Calculate Lines of Code (Daily)**:
   ```bash
   git log --since=midnight --diff-filter=A --name-only --pretty=format: | sort -u | xargs cloc
