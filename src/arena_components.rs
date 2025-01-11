@@ -26,6 +26,25 @@ pub struct GuildHouse;
 #[derive(Component)]
 pub struct Menu;
 
+#[derive(Component)]
+pub struct LabyrinthCharacterSelected;
+#[derive(Component)]
+pub struct SanctumCharacterSelected;
+#[derive(Component)]
+pub struct PawnshopCharacterSelected;
+#[derive(Component)]
+pub struct BastionCharacterSelected;
+#[derive(Component)]
+pub struct MountainCharacterSelected;
+#[derive(Component)]
+pub struct CrucibleCharacterSelected;
+#[derive(Component)]
+pub struct CasinoCharacterSelected;
+#[derive(Component)]
+pub struct GalaCharacterSelected;
+#[derive(Component)]
+pub struct GuildHouseCharacterSelected;
+
 // Implement the ComponentDisplay trait for each component
 impl ArenaTraits for Labyrinth {
     fn to_display_string(&self) -> String {

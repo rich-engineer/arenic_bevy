@@ -1,7 +1,7 @@
 use crate::arena_components::{ActiveArena, Arena, ArenaBossText, ArenaName, ArenasParent, Bastion, Casino, Crucible, Gala, GuildHouse, Labyrinth, Menu, Mountain, Pawnshop, Sanctum, SelectedHero};
 use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, HALF_TILE_SIZE, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
 use crate::shared_traits::{ArenaTraits};
-use crate::state::GlobalState;
+use crate::state::{GameState, GlobalState};
 use bevy::prelude::*;
 
 
@@ -100,8 +100,8 @@ fn update_arena_boss_text(
     active_arena_query: Query<(&Arena, &ArenaName), With<ActiveArena>>,
 ) {
     // Get the first (and presumably only) active arena:
-    let Some((arena, arena_name)) = active_arena_query.iter().next() else {
-        warn!("No active Arena found");
+    let Ok((arena, arena_name)) = active_arena_query.get_single() else {
+        warn!("No active Arena found boss Text");
         return;
     };
 
@@ -143,6 +143,6 @@ pub struct ArenaPlugin;
 impl Plugin for ArenaPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_all_arenas);
-        app.add_systems(Update, (highlight_arena_system, update_arena_boss_text));
+        app.add_systems(Update, (highlight_arena_system, update_arena_boss_text).run_if(in_state(GameState::Intro)));
     }
 }
