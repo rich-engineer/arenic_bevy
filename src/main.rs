@@ -1,26 +1,6 @@
-use bevy::prelude::*;
-mod abilities;
-mod arenas;
-mod cameras;
-mod characters;
 mod constants;
-mod events;
-mod global_chat;
-mod hud;
-mod interactions;
-mod intro;
-mod shared_traits;
-mod state;
-mod title;
-
-use abilities::AbilitiesPlugin;
-use arenas::ArenaPlugin;
-use cameras::CamerasPlugin;
+use bevy::prelude::*;
 use constants::RESOLUTION;
-use hud::HUDPlugin;
-use intro::IntroPlugin;
-use state::StatePlugin;
-use title::TitlePlugin;
 
 fn main() {
     App::new()
@@ -37,12 +17,5 @@ fn main() {
                     ..Default::default()
                 }),
         )
-        .add_plugins(StatePlugin)
-        .add_plugins(CamerasPlugin)
-        .add_plugins(IntroPlugin)
-        .add_plugins(TitlePlugin)
-        .add_plugins(HUDPlugin)
-        .add_plugins(AbilitiesPlugin)
-        .add_plugins(ArenaPlugin)
         .run();
 }
