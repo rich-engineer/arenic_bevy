@@ -1,5 +1,5 @@
 use crate::arena_components::{ActiveArena, Arena, ArenaBossText, ArenaName, ArenasParent, Bastion, Casino, Crucible, Gala, GuildHouse, Labyrinth, Menu, Mountain, Pawnshop, Sanctum, SelectedHero};
-use crate::constants::{ARENA_HEIGHT, ARENA_HEIGHT_HALF, ARENA_WIDTH, ARENA_WIDTH_HALF, GRID_HEIGHT, GRID_WIDTH, HALF_TILE_SIZE, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, HALF_TILE_SIZE, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
 use crate::shared_traits::{ArenaTraits};
 use crate::state::GlobalState;
 use bevy::prelude::*;
@@ -8,8 +8,8 @@ use bevy::prelude::*;
 
 fn get_position(offset: Vec2) -> Vec3 {
     // Example logic, matching your original offset usage:
-    let start_x = -(ARENA_WIDTH / 2.0) + (TILE_SIZE / 2.0) + (ARENA_WIDTH * offset.x);
-    let start_y = (ARENA_HEIGHT / 2.0) + (TILE_SIZE - 1.0) + (ARENA_HEIGHT * offset.y);
+    let start_x = -(ARENA_WIDTH) + (TILE_SIZE / 2.0) + (ARENA_WIDTH * offset.x);
+    let start_y = (ARENA_HEIGHT) + (TILE_SIZE - 1.0) + (ARENA_HEIGHT * offset.y);
     Vec3::new(start_x, start_y, 0.0)
 }
 
@@ -47,7 +47,7 @@ pub fn setup_all_arenas(
         commands
             .spawn((
                 ArenasParent,
-                Transform::from_xyz(-(ARENA_WIDTH/2.0 - HALF_TILE_SIZE), (ARENA_HEIGHT/2.0 + TILE_SIZE), 0.0),
+                Transform::from_xyz(0.0, 0.0, 0.0),
                 InheritedVisibility::default(),
                 GlobalTransform::default(),
             ))
@@ -94,31 +94,21 @@ pub fn setup_tiles(commands: &mut ChildBuilder, texture: &Handle<Image>) {
     }
 }
 
-pub struct ArenaPlugin;
-
-impl Plugin for ArenaPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_all_arenas);
-        app.add_systems(Update, (highlight_arena_system));
-    }
-}
-
-
 fn update_arena_boss_text(
-    mut query: Query<&mut Text, With<ArenaBossText>>,
-    arenas: Query<(&Arena, &ArenaName)>,
-    state: Res<GlobalState>,
+    mut text_query: Query<&mut Text, With<ArenaBossText>>,
+    // We only query for the arena that is active:
+    active_arena_query: Query<(&Arena, &ArenaName), With<ActiveArena>>,
 ) {
-    let current_arena_id = state.current_arena;
+    // Get the first (and presumably only) active arena:
+    let Some((arena, arena_name)) = active_arena_query.iter().next() else {
+        warn!("No active Arena found");
+        return;
+    };
 
-    if let Some((_, arena_name)) = arenas
-        .iter()
-        .find(|(arena, _)| arena.id == current_arena_id)
-    {
-        for mut text in &mut query {
-            text.clear();
-            text.push_str(&arena_name.0);
-        }
+    // Update the arena boss text with the active arena's name:
+    for mut text in &mut text_query {
+        text.clear();
+        text.push_str(&arena_name.0);
     }
 }
 
@@ -134,7 +124,6 @@ fn highlight_arena_system(
     if let Ok((arena, _)) = active_arena.get_single() {
         let current_arena_index = arena.id as usize;
 
-        info!("{}, {}", current_arena_index,  OFFSET_MATRIX[current_arena_index].y);
         for i in 0..3 {
             let pos = Vec2::new(
                 -(ARENA_WIDTH/2.0 - HALF_TILE_SIZE) + ARENA_WIDTH * OFFSET_MATRIX[current_arena_index].x + i as f32,
@@ -146,5 +135,14 @@ fn highlight_arena_system(
                 Color::hsla(0.0, 0.0, 0.0, 1.0),
             );
         }
+    }
+}
+
+pub struct ArenaPlugin;
+
+impl Plugin for ArenaPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_all_arenas);
+        app.add_systems(Update, (highlight_arena_system, update_arena_boss_text));
     }
 }

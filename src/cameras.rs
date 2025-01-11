@@ -1,9 +1,8 @@
-use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, GRID_HEIGHT, GRID_WIDTH, MENU_POS, MENU_SCALE, OFFSET_MATRIX, TILE_SIZE};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, GRID_WIDTH, HALF_TILE_SIZE, MENU_POS, MENU_SCALE, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
 use crate::state::{GameState, GlobalState};
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
-use bevy::utils::info;
 use crate::arena_components::{ActiveArena, Arena};
 
 pub struct CamerasPlugin;
@@ -19,8 +18,7 @@ impl Plugin for CamerasPlugin {
     }
 }
 
-fn setup_camera(mut commands: Commands, global_state: Res<GlobalState>) {
-    let new_position = get_current_arena_pos(&global_state);
+fn setup_camera(mut commands: Commands) {
     commands.spawn((
         Camera2d,
         Camera {
@@ -39,21 +37,10 @@ fn setup_camera(mut commands: Commands, global_state: Res<GlobalState>) {
             area: Rect::new(-1.0, -1.0, 1.0, 1.0),
         },
         Transform {
-            translation: new_position,
+            translation: Vec3::new(0.0, 0.0, 0.0),
             ..Default::default()
         },
     ));
-}
-
-fn get_current_arena_pos(global_state: &Res<GlobalState>) -> Vec3 {
-    let current_arena = global_state.current_arena as usize;
-
-
-    Vec3::new(
-        ARENA_WIDTH * OFFSET_MATRIX[current_arena].x - 1.0,
-        ARENA_HEIGHT* OFFSET_MATRIX[current_arena].y - 1.0,
-        0.0,
-    )
 }
 
 fn handle_camera_input(
@@ -113,8 +100,13 @@ fn update_camera(
         camera_transform.translation = MENU_POS;
     } else {
         if let Ok((_, arena_transform)) = arena_query.get_single() {
+            let pos = Vec3::new(
+                arena_transform.translation.x + (ARENA_WIDTH/2.0 - HALF_TILE_SIZE),
+                arena_transform.translation.y - (ARENA_HEIGHT/2.0 + TILE_SIZE),
+                arena_transform.translation.z
+            ) ;
             projection.scale = GAME_SCALE;
-            camera_transform.translation = arena_transform.translation;
+            camera_transform.translation = pos;
         }
     }
 }
