@@ -15,20 +15,20 @@ impl Plugin for IntroPlugin {
             OnEnter(GameState::Intro),
             intro_spawn_guildmaster_and_recruit.after(set_camera_intro_arena)
         );
-        app.add_systems(
-            Update,
-            (
-                set_arenas_active_or_inactive
-                    .after(intro_spawn_guildmaster_and_recruit)
-                    .run_if(in_state(GameState::Intro)),
+        // app.add_systems(
+        //     Update,
+        //     (
+                // set_arenas_active_or_inactive
+                //     .after(intro_spawn_guildmaster_and_recruit)
+                //     .run_if(in_state(GameState::Intro)),
                 // cycle_selected_hero_system
                 //     .after(set_arenas_active_or_inactive)
                 //     .run_if(in_state(GameState::Intro)),
                 // update_shadow_visibility
                 //     .after(cycle_selected_hero_system)
                 //     .run_if(in_state(GameState::Intro))
-            ).chain()
-        );
+        //     ).chain()
+        // );
 
     }
 }
@@ -47,27 +47,27 @@ fn set_camera_intro_arena(
     }
 }
 
-fn set_arenas_active_or_inactive(
-    mut commands: Commands,
-    arenas_query: Query<(Entity, &Arena), With<Arena>>,
-    active_arena_query: Query<(Entity, &Arena), With<ActiveArena>>,
-) {
-    if let Ok((active_entity, active_arena)) = active_arena_query.get_single() {
-        for (entity, arena) in arenas_query.iter() {
-            if arena.id == active_arena.id {
-                // Add ActiveArena only if it is not already present
-                if entity != active_entity {
-                    commands.entity(entity).insert(ActiveArena);
-                }
-            } else {
-                // Remove ActiveArena from non-matching entities
-                commands.entity(entity).remove::<ActiveArena>();
-            }
-        }
-    } else {
-        warn!("All Arenas are Inactive");
-    }
-}
+// fn set_arenas_active_or_inactive(
+//     mut commands: Commands,
+//     arenas_query: Query<(Entity, &Arena), With<Arena>>,
+//     active_arena_query: Query<(Entity, &Arena), With<ActiveArena>>,
+// ) {
+//     if let Ok((active_entity, active_arena)) = active_arena_query.get_single() {
+//         for (entity, arena) in arenas_query.iter() {
+//             if arena.id == active_arena.id {
+//                 // Add ActiveArena only if it is not already present
+//                 if entity != active_entity {
+//                     commands.entity(entity).insert(ActiveArena);
+//                 }
+//             } else {
+//                 // Remove ActiveArena from non-matching entities
+//                 commands.entity(entity).remove::<ActiveArena>();
+//             }
+//         }
+//     } else {
+//         warn!("All Arenas are Inactive");
+//     }
+// }
 
 fn intro_spawn_guildmaster_and_recruit(
     mut commands: Commands,

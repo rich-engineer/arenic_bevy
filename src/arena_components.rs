@@ -37,6 +37,9 @@ impl ArenaTraits for Labyrinth {
     fn grid_index(&self) -> u8 {
         0
     }
+    fn debug_tile(&self) -> &str {
+        "UI/hunter_tile.png"
+    }
 }
 
 impl ArenaTraits for GuildHouse {
@@ -48,6 +51,9 @@ impl ArenaTraits for GuildHouse {
     }
     fn grid_index(&self) -> u8 {
         1
+    }
+    fn debug_tile(&self) -> &str {
+        "UI/guild_tile.png"
     }
 }
 
@@ -61,6 +67,9 @@ impl ArenaTraits for Sanctum {
     fn grid_index(&self) -> u8 {
         2
     }
+    fn debug_tile(&self) -> &str {
+        "UI/cardinal_tile.png"
+    }
 }
 
 impl ArenaTraits for Mountain {
@@ -72,6 +81,9 @@ impl ArenaTraits for Mountain {
     }
     fn grid_index(&self) -> u8 {
         3
+    }
+    fn debug_tile(&self) -> &str {
+        "UI/forager_tile.png"
     }
 }
 
@@ -85,6 +97,9 @@ impl ArenaTraits for Bastion {
     fn grid_index(&self) -> u8 {
         4
     }
+    fn debug_tile(&self) -> &str {
+        "UI/warrior_tile.png"
+    }
 }
 
 impl ArenaTraits for Pawnshop {
@@ -96,6 +111,9 @@ impl ArenaTraits for Pawnshop {
     }
     fn grid_index(&self) -> u8 {
         5
+    }
+    fn debug_tile(&self) -> &str {
+        "UI/thief_tile.png"
     }
 }
 
@@ -109,6 +127,9 @@ impl ArenaTraits for Crucible {
     fn grid_index(&self) -> u8 {
         6
     }
+    fn debug_tile(&self) -> &str {
+        "UI/alchemist_tile.png"
+    }
 }
 
 impl ArenaTraits for Casino {
@@ -120,6 +141,9 @@ impl ArenaTraits for Casino {
     }
     fn grid_index(&self) -> u8 {
         7
+    }
+    fn debug_tile(&self) -> &str {
+        "UI/merchant_tile.png"
     }
 }
 
@@ -133,6 +157,9 @@ impl ArenaTraits for Gala {
     fn grid_index(&self) -> u8 {
         8
     }
+    fn debug_tile(&self) -> &str {
+        "UI/bard_tile.png"
+    }
 }
 
 
@@ -145,6 +172,9 @@ impl ArenaTraits for Menu {
     }
     fn grid_index(&self) -> u8 {
         8
+    }
+    fn debug_tile(&self) -> &str {
+        "UI/default_tile.png"
     }
 }
 

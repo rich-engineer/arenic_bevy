@@ -1,10 +1,10 @@
-use crate::constants::{
-    GAME_SCALE, GRID_HEIGHT, GRID_WIDTH, MENU_POS, MENU_SCALE, OFFSET_MATRIX, TILE_SIZE,
-};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, GRID_HEIGHT, GRID_WIDTH, MENU_POS, MENU_SCALE, OFFSET_MATRIX, TILE_SIZE};
 use crate::state::{GameState, GlobalState};
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
+use bevy::utils::info;
+use crate::arena_components::{ActiveArena, Arena};
 
 pub struct CamerasPlugin;
 
@@ -13,7 +13,7 @@ impl Plugin for CamerasPlugin {
         app.add_systems(Startup, setup_camera);
         app.add_systems(
             Update,
-            (handle_camera_input,).run_if(not(in_state(GameState::Title))),
+            (handle_camera_input).run_if(not(in_state(GameState::Title))),
         );
         app.add_systems(Update, update_camera.after(handle_camera_input));
     }
@@ -47,46 +47,74 @@ fn setup_camera(mut commands: Commands, global_state: Res<GlobalState>) {
 
 fn get_current_arena_pos(global_state: &Res<GlobalState>) -> Vec3 {
     let current_arena = global_state.current_arena as usize;
-    let offset_x = GRID_WIDTH as f32 * TILE_SIZE;
-    let offset_y = GRID_HEIGHT as f32 * TILE_SIZE;
+
 
     Vec3::new(
-        offset_x * OFFSET_MATRIX[current_arena].x - 1.0,
-        offset_y * OFFSET_MATRIX[current_arena].y - 1.0,
+        ARENA_WIDTH * OFFSET_MATRIX[current_arena].x - 1.0,
+        ARENA_HEIGHT* OFFSET_MATRIX[current_arena].y - 1.0,
         0.0,
     )
 }
 
 fn handle_camera_input(
-    mut global_state: ResMut<GlobalState>,
+    mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut arena_query: Query<(Entity, &Arena), With<ActiveArena>>,
+    all_arenas: Query<(Entity, &Arena)>,
+    mut state: ResMut<GlobalState>,
 ) {
+    let Some((current_active_entity, current_arena)) = arena_query.iter_mut().next() else {
+        warn!("No active Arena found");
+        return; // or handle no active arena
+    };
     if keyboard_input.just_pressed(KeyCode::BracketLeft) {
-        global_state.current_arena = (global_state.current_arena + 9 - 1) % 9;
+        let new_id = (current_arena.id + 9 - 1) % 9;
+        info!("New ID: {}", new_id);
+        swap_active_arena(&mut commands, current_active_entity, new_id, &all_arenas);
     }
     if keyboard_input.just_pressed(KeyCode::BracketRight) {
-        global_state.current_arena = (global_state.current_arena + 1) % 9;
+        let new_id = (current_arena.id + 1) % 9;
+        swap_active_arena(&mut commands, current_active_entity, new_id, &all_arenas);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyP) {
-        global_state.active_menu = !global_state.active_menu;
+        state.active_menu = !state.active_menu;
+    }
+}
+fn swap_active_arena(
+    commands: &mut Commands,
+    old_active: Entity,
+    new_id: u8,
+    all_arenas: &Query<(Entity, &Arena)>,
+) {
+    // Remove marker from old
+    commands.entity(old_active).remove::<ActiveArena>();
+
+    // Add marker to the new arena
+    if let Some((new_entity, _arena)) = all_arenas.iter().find(|(_, a)| a.id == new_id) {
+        commands.entity(new_entity).insert(ActiveArena);
     }
 }
 
+
+/// Reference
+/// https://chatgpt.com/c/6780cc05-88f8-800c-8b99-610b39be98ce
 fn update_camera(
+    arena_query: Query<(&Arena, &Transform), (With<ActiveArena>, Without<Camera>)>,
     state: Res<GlobalState>,
-    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
+    mut camera: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
 ) {
-    let Ok((mut projection, mut transform)) = query.get_single_mut() else {
+    let Ok((mut projection, mut camera_transform)) = camera.get_single_mut() else {
         return;
     };
 
-    let (scale, position) = if state.active_menu {
-        (MENU_SCALE, MENU_POS)
+    if state.active_menu {
+        projection.scale = MENU_SCALE;
+        camera_transform.translation = MENU_POS;
     } else {
-        (GAME_SCALE, get_current_arena_pos(&state))
-    };
-
-    projection.scale = scale;
-    transform.translation = position;
+        if let Ok((_, arena_transform)) = arena_query.get_single() {
+            projection.scale = GAME_SCALE;
+            camera_transform.translation = arena_transform.translation;
+        }
+    }
 }

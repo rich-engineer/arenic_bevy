@@ -1,7 +1,5 @@
 use crate::arena_components::{ActiveArena, Arena, ArenaBossText, ArenaName, ArenasParent, Bastion, Casino, Crucible, Gala, GuildHouse, Labyrinth, Menu, Mountain, Pawnshop, Sanctum, SelectedHero};
-use crate::constants::{
-    ARENA_HEIGHT, ARENA_WIDTH, GRID_HEIGHT, GRID_WIDTH, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE,
-};
+use crate::constants::{ARENA_HEIGHT, ARENA_HEIGHT_HALF, ARENA_WIDTH, ARENA_WIDTH_HALF, GRID_HEIGHT, GRID_WIDTH, HALF_TILE_SIZE, MENU_Y_OFFSET, OFFSET_MATRIX, TILE_SIZE};
 use crate::shared_traits::{ArenaTraits};
 use crate::state::GlobalState;
 use bevy::prelude::*;
@@ -49,25 +47,33 @@ pub fn setup_all_arenas(
         commands
             .spawn((
                 ArenasParent,
-                Transform::from_xyz(0.0, 0.0, 0.0),
+                Transform::from_xyz(-(ARENA_WIDTH/2.0 - HALF_TILE_SIZE), (ARENA_HEIGHT/2.0 + TILE_SIZE), 0.0),
                 InheritedVisibility::default(),
                 GlobalTransform::default(),
             ))
             .id()
     };
 
-    let texture = asset_server.load("UI/default_tile.png");
+    let texture0 = asset_server.load(Labyrinth.debug_tile());
+    let texture1 = asset_server.load(GuildHouse.debug_tile());
+    let texture2 = asset_server.load(Sanctum.debug_tile());
+    let texture3 = asset_server.load(Mountain.debug_tile());
+    let texture4 = asset_server.load(Bastion.debug_tile());
+    let texture5 = asset_server.load(Pawnshop.debug_tile());
+    let texture6 = asset_server.load(Crucible.debug_tile());
+    let texture7 = asset_server.load(Casino.debug_tile());
+    let texture8 = asset_server.load(Gala.debug_tile());
 
     // Spawn each arena individually
-    spawn_single_arena(&mut commands, parent_entity, Labyrinth, &texture); // 0
-    spawn_single_arena(&mut commands, parent_entity, GuildHouse, &texture); // 1
-    spawn_single_arena(&mut commands, parent_entity, Sanctum, &texture); // 2
-    spawn_single_arena(&mut commands, parent_entity, Mountain, &texture); // 3
-    spawn_single_arena(&mut commands, parent_entity, Bastion, &texture); // 4
-    spawn_single_arena(&mut commands, parent_entity, Pawnshop, &texture); // 5
-    spawn_single_arena(&mut commands, parent_entity, Crucible, &texture); // 6
-    spawn_single_arena(&mut commands, parent_entity, Casino, &texture); // 7
-    spawn_single_arena(&mut commands, parent_entity, Gala, &texture); // 8
+    spawn_single_arena(&mut commands, parent_entity, Labyrinth, &texture0); // 0
+    spawn_single_arena(&mut commands, parent_entity, GuildHouse, &texture1); // 1
+    spawn_single_arena(&mut commands, parent_entity, Sanctum, &texture2); // 2
+    spawn_single_arena(&mut commands, parent_entity, Mountain, &texture3); // 3
+    spawn_single_arena(&mut commands, parent_entity, Bastion, &texture4); // 4
+    spawn_single_arena(&mut commands, parent_entity, Pawnshop, &texture5); // 5
+    spawn_single_arena(&mut commands, parent_entity, Crucible, &texture6); // 6
+    spawn_single_arena(&mut commands, parent_entity, Casino, &texture7); // 7
+    spawn_single_arena(&mut commands, parent_entity, Gala, &texture8); // 8
 }
 
 
@@ -93,7 +99,7 @@ pub struct ArenaPlugin;
 impl Plugin for ArenaPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_all_arenas);
-        // app.add_systems(Update, (update_arena_boss_text, highlight_arena_system));
+        app.add_systems(Update, (highlight_arena_system));
     }
 }
 
@@ -127,17 +133,16 @@ fn highlight_arena_system(
 
     if let Ok((arena, _)) = active_arena.get_single() {
         let current_arena_index = arena.id as usize;
-        let total_width = GRID_WIDTH as f32 * TILE_SIZE;
-        let total_height = GRID_HEIGHT as f32 * TILE_SIZE;
 
+        info!("{}, {}", current_arena_index,  OFFSET_MATRIX[current_arena_index].y);
         for i in 0..3 {
             let pos = Vec2::new(
-                total_width * OFFSET_MATRIX[current_arena_index].x + i as f32,
-                total_height * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) - i as f32,
+                -(ARENA_WIDTH/2.0 - HALF_TILE_SIZE) + ARENA_WIDTH * OFFSET_MATRIX[current_arena_index].x + i as f32,
+                (ARENA_HEIGHT/2.0 + TILE_SIZE) + ARENA_HEIGHT * OFFSET_MATRIX[current_arena_index].y - (MENU_Y_OFFSET / 2.0) - i as f32,
             );
             gizmos.rect_2d(
                 pos,
-                Vec2::new(total_width, total_height),
+                Vec2::new(ARENA_WIDTH, ARENA_HEIGHT),
                 Color::hsla(0.0, 0.0, 0.0, 1.0),
             );
         }
