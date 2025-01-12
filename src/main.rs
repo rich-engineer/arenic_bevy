@@ -1,6 +1,19 @@
+mod arenas;
+mod cameras;
+mod characters;
 mod constants;
+mod intro;
+mod scenes;
+mod state;
+mod title;
+
+use arenas::{setup_arenas};
 use bevy::prelude::*;
+use cameras::{setup_camera, CamerasPlugin};
 use constants::RESOLUTION;
+use intro::{set_camera_intro_arena};
+use state::StatePlugin;
+use crate::intro::intro_spawn_guildmaster_and_recruit;
 
 fn main() {
     App::new()
@@ -16,6 +29,17 @@ fn main() {
                     }),
                     ..Default::default()
                 }),
+        )
+        .add_plugins(StatePlugin)
+        .add_plugins(CamerasPlugin)
+        .add_systems(
+            Startup,
+            (
+                setup_camera,
+                setup_arenas.after(setup_camera),
+                set_camera_intro_arena.after(setup_arenas),
+                intro_spawn_guildmaster_and_recruit.after(setup_arenas)
+            ),
         )
         .run();
 }
