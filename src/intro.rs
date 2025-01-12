@@ -1,8 +1,8 @@
 use crate::arenas::{ActiveArena, Arenas, GuildHouse};
 use crate::characters::{ActiveHero, Character, GuildMaster, Hero, Hunter, SelectedShadow};
 use crate::constants::{
-    ARENA_CENTER, ARENA_HEIGHT, ARENA_HEIGHT_HALF, ARENA_WIDTH_HALF, BOTTOM_BOUND, BOTTOM_ROW,
-    LEFT_BOUND, LEFT_COL, RIGHT_BOUND, RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW, TOTAL_COLS,
+    ARENA_HEIGHT, ARENA_WIDTH_HALF, BOTTOM_BOUND, BOTTOM_ROW, LEFT_BOUND, LEFT_COL, RIGHT_BOUND,
+    RIGHT_COL, TILE_SIZE, TOP_BOUND, TOP_ROW, TOTAL_COLS,
 };
 use bevy::prelude::*;
 // use crate::events::{EventTimeline, RecordMode};
@@ -98,8 +98,26 @@ fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>) {
         Visibility::Hidden,
     ));
 }
+pub fn update_shadow_visibility(
+    mut shadow_query: Query<(&Parent, &mut Visibility), With<SelectedShadow>>,
+    selected_query: Query<(), With<ActiveHero>>,
+) {
+    // TODO maybe update (last q/a https://chatgpt.com/share/6781fd52-8218-800c-b63a-f1a23e493650)
+    // Iterate through all shadow entities
+    for (parent, mut visibility) in shadow_query.iter_mut() {
+        // Check if parent entity has Selected component
+        if selected_query.get(parent.get()).is_ok() {
+            // Parent is selected, show shadow
+            *visibility = Visibility::Visible;
+        } else {
+            // Parent not selected, hide shadow
+            *visibility = Visibility::Hidden;
+        }
+    }
+}
+
 fn move_active_hero(
-    active_arena_query: Query<(Entity, &Arenas), (With<ActiveArena>)>,
+    active_arena_query: Query<(Entity, &Arenas), With<ActiveArena>>,
     mut heroes_query: Query<(&Parent, &mut Transform), With<ActiveHero>>,
     input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -284,6 +302,10 @@ impl Plugin for IntroPlugin {
             Update,
             (move_active_hero, transition_hero_to_new_active_arena).run_if(move_keys_pressed),
         )
-        .add_systems(Update, cycle_selected_hero_system.run_if(tab_keys_pressed));
+        .add_systems(
+            Update,
+            (cycle_selected_hero_system).run_if(tab_keys_pressed),
+        )
+        .add_systems(Update, update_shadow_visibility);
     }
 }

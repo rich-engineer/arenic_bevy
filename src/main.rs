@@ -8,13 +8,13 @@ mod scenes;
 mod state;
 mod title;
 
-use crate::hud::HUDPlugin;
-use crate::intro::{intro_spawn_guildmaster_and_recruit, IntroPlugin};
 use arenas::setup_arenas;
 use bevy::prelude::*;
 use cameras::{setup_camera, CamerasPlugin};
 use constants::RESOLUTION;
+use hud::HUDPlugin;
 use intro::set_camera_intro_arena;
+use intro::{intro_spawn_guildmaster_and_recruit, IntroPlugin};
 use state::StatePlugin;
 
 fn main() {

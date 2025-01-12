@@ -13,7 +13,7 @@ pub struct SelectedShadow;
 pub struct Hunter;
 
 #[derive(Component)]
-#[warn(dead_code)]
+#[allow(dead_code)]
 pub struct Character {
     pub name: String,
 }

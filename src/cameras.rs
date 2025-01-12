@@ -1,5 +1,5 @@
-use crate::arenas::{arena_offset, ActiveArena, Arenas, ArenasContainer};
-use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS, MENU_SCALE, TILE_SIZE};
+use crate::arenas::{ActiveArena, Arenas};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS, MENU_SCALE};
 use crate::state::GlobalState;
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
@@ -42,7 +42,7 @@ fn update_camera_scale_position_by_arena(
         projection.scale = MENU_SCALE;
         camera_transform.translation = MENU_POS;
     } else {
-        if let Ok((arena, arena_transform)) = arena_query.get_single() {
+        if let Ok((_, arena_transform)) = arena_query.get_single() {
             let x = arena_transform.translation.x - ARENA_WIDTH;
             let y = arena_transform.translation.y + ARENA_HEIGHT;
             let pos = Vec3::new(x, y, arena_transform.translation.z);
@@ -106,10 +106,10 @@ fn highlight_arena_system(
     active_arena: Query<(&Arenas, &Transform), With<ActiveArena>>,
     menu_state: Res<GlobalState>,
 ) {
-    if (!menu_state.active_menu) {
+    if !menu_state.active_menu {
         return;
     }
-    if let Ok((arena, transform)) = active_arena.get_single() {
+    if let Ok((_, transform)) = active_arena.get_single() {
         let border_width = 8;
         let half_border_width = 4.0;
         for i in 0..border_width {
