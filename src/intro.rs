@@ -207,12 +207,74 @@ fn transition_hero_to_new_active_arena(
             });
     }
 }
+
+pub fn cycle_selected_hero_system(
+    input: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    active_arena_query: Query<Entity, With<ActiveArena>>,
+    heroes_query: Query<(Entity, &Parent, Option<&ActiveHero>), With<Hero>>,
+) {
+    // 1. Find the single "active arena" entity
+    let Ok(active_arena_entity) = active_arena_query.get_single() else {
+        warn!("Cycle: No active arena found or multiple arenas marked as active!");
+        return;
+    };
+
+    // 2. Gather all heroes that belong to the active arena.
+    //    We do this by checking if hero's parent == the active arena entity.
+    let arena_heroes: Vec<(Entity, bool)> = heroes_query
+        .iter()
+        .filter_map(|(hero_entity, parent, selected)| {
+            if parent.get() == active_arena_entity {
+                Some((hero_entity, selected.is_some()))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // If there are no heroes in this active arena, do nothing.
+    if arena_heroes.is_empty() {
+        info!("Active arena has no heroes.");
+        // TODO Select the first
+        return;
+    }
+
+    // 3. On `Tab` press, cycle selection among `arena_heroes`.
+    if input.just_pressed(KeyCode::Tab) {
+        // Find which hero is currently selected (if any).
+        let selected_index = arena_heroes
+            .iter()
+            .position(|(_, is_selected)| *is_selected);
+
+        match selected_index {
+            // If some hero is selected:
+            Some(idx) => {
+                // Remove Selected from the currently selected hero
+                commands.entity(arena_heroes[idx].0).remove::<ActiveHero>();
+
+                // Move to the next hero in the list
+                let next_idx = (idx + 1) % arena_heroes.len();
+
+                // Add Selected to the new hero
+                commands.entity(arena_heroes[next_idx].0).insert(ActiveHero);
+            }
+            // If no hero is selected, select the first hero in the list.
+            None => {
+                let hero = arena_heroes[0].0;
+                commands.entity(hero).insert(ActiveHero);
+            }
+        }
+    }
+}
+fn tab_keys_pressed(input: Res<ButtonInput<KeyCode>>) -> bool {
+    input.just_pressed(KeyCode::Tab)
+}
 fn move_keys_pressed(input: Res<ButtonInput<KeyCode>>) -> bool {
     input.just_pressed(KeyCode::KeyS)
         || input.just_pressed(KeyCode::KeyW)
         || input.just_pressed(KeyCode::KeyA)
         || input.just_pressed(KeyCode::KeyD)
-        || input.just_pressed(KeyCode::Tab)
 }
 pub struct IntroPlugin;
 
@@ -220,7 +282,8 @@ impl Plugin for IntroPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            ((move_active_hero, transition_hero_to_new_active_arena).run_if(move_keys_pressed)),
-        );
+            (move_active_hero, transition_hero_to_new_active_arena).run_if(move_keys_pressed),
+        )
+        .add_systems(Update, cycle_selected_hero_system.run_if(tab_keys_pressed));
     }
 }
