@@ -1,8 +1,5 @@
-use crate::arenas::{arena_offset, ActiveArena, Arenas};
-use crate::constants::{
-    ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS,
-    MENU_SCALE,
-};
+use crate::arenas::{arena_offset, ActiveArena, Arenas, ArenasContainer};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS, MENU_SCALE, TILE_SIZE};
 use crate::state::GlobalState;
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
@@ -50,7 +47,7 @@ fn update_camera_scale_position_by_arena(
     } else {
         if let Ok((arena, arena_transform)) = arena_query.get_single() {
             let (_, arena_y) = arena_offset(arena.order);
-            let y = - arena_y + ARENA_HEIGHT;
+            let y = -arena_y + ARENA_HEIGHT;
             let pos = Vec3::new(
                 arena_transform.translation.x - ARENA_WIDTH,
                 y,
@@ -109,6 +106,31 @@ fn any_camera_control_keys_just_pressed(input: Res<ButtonInput<KeyCode>>) -> boo
         || input.just_pressed(KeyCode::BracketLeft)
         || input.just_pressed(KeyCode::KeyP)
 }
+
+fn highlight_arena_system(
+    mut gizmos: Gizmos,
+    active_arena: Query<(&Arenas, &Transform), With<ActiveArena>>,
+    menu_state: Res<GlobalState>,
+) {
+    if (!menu_state.active_menu) {
+        return;
+    }
+    if let Ok((arena, transform)) = active_arena.get_single() {
+        
+        let border_width = 8;
+        let half_border_width = 4.0;
+        for i in 0..border_width {
+            let x = transform.translation.x - ARENA_WIDTH  - half_border_width + i as f32; 
+            let y = transform.translation.y + ARENA_HEIGHT - half_border_width + i as f32; 
+            let pos = Vec2::new(x, y);
+            gizmos.rect_2d(
+                pos,
+                Vec2::new(ARENA_WIDTH, ARENA_HEIGHT),
+                Color::hsla(0.0, 0.0, 0.0, 1.0),
+            );
+        }
+    }
+}
 pub struct CamerasPlugin;
 impl Plugin for CamerasPlugin {
     fn build(&self, app: &mut App) {
@@ -117,6 +139,7 @@ impl Plugin for CamerasPlugin {
             (
                 update_camera_scale_position_by_arena,
                 handle_camera_input.run_if(any_camera_control_keys_just_pressed),
+                highlight_arena_system,
             ),
         );
     }

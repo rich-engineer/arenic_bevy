@@ -3,7 +3,6 @@ use bevy::prelude::Component;
 #[derive(Component)]
 pub struct Hero;
 
-
 #[derive(Component)]
 pub struct GuildMaster;
 

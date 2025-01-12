@@ -7,13 +7,13 @@ mod scenes;
 mod state;
 mod title;
 
-use arenas::{setup_arenas};
+use crate::intro::intro_spawn_guildmaster_and_recruit;
+use arenas::setup_arenas;
 use bevy::prelude::*;
 use cameras::{setup_camera, CamerasPlugin};
 use constants::RESOLUTION;
-use intro::{set_camera_intro_arena};
+use intro::set_camera_intro_arena;
 use state::StatePlugin;
-use crate::intro::intro_spawn_guildmaster_and_recruit;
 
 fn main() {
     App::new()
@@ -38,7 +38,7 @@ fn main() {
                 setup_camera,
                 setup_arenas.after(setup_camera),
                 set_camera_intro_arena.after(setup_arenas),
-                intro_spawn_guildmaster_and_recruit.after(setup_arenas)
+                intro_spawn_guildmaster_and_recruit.after(setup_arenas),
             ),
         )
         .run();

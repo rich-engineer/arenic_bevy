@@ -1,7 +1,7 @@
 use crate::arenas::{ActiveArena, Arenas, GuildHouse};
-use bevy::prelude::*;
-use crate::characters::{ActiveHero, Character,  GuildMaster, Hero, Hunter, SelectedShadow};
+use crate::characters::{ActiveHero, Character, GuildMaster, Hero, Hunter, SelectedShadow};
 use crate::constants::{ARENA_CENTER, TILE_SIZE};
+use bevy::prelude::*;
 // use crate::events::{EventTimeline, RecordMode};
 
 pub fn set_camera_intro_arena(
@@ -25,16 +25,9 @@ pub fn set_camera_intro_arena(
 }
 pub fn intro_spawn_guildmaster_and_recruit(
     mut commands: Commands,
-    guild_house:  Query<(Entity, &Arenas), With<GuildHouse>>,
+    guild_house: Query<(Entity, &Arenas), With<GuildHouse>>,
     asset_server: Res<AssetServer>,
-    // active_arena_query: Query<&Arenas, With<ActiveArena>>,
 ) {
-    // Get the arena that is currently active:
-    // let Ok(active_arena) = active_arena_query.get_single() else {
-    //     warn!("No active Arena found (or multiple arenas marked as active).");
-    //     return;
-    // };
-
     let Ok((entity, arena)) = guild_house.get_single() else {
         warn!("No single GuildHouse entity found or multiple GuildHouse entities exist.");
         return;
@@ -49,7 +42,9 @@ pub fn intro_spawn_guildmaster_and_recruit(
             Transform::from_xyz(x - (TILE_SIZE * 4.0), y, 9.0),
             InheritedVisibility::default(),
             GlobalTransform::default(),
-            Character{name:"Dean".to_string()},
+            Character {
+                name: "Dean".to_string(),
+            },
             Hero,
             GuildMaster,
             Sprite {
@@ -69,7 +64,9 @@ pub fn intro_spawn_guildmaster_and_recruit(
             Transform::from_xyz(x + (TILE_SIZE * 4.0), y, 9.0),
             InheritedVisibility::default(),
             GlobalTransform::default(),
-            Character{ name: "Matthew".to_string()},
+            Character {
+                name: "Matthew".to_string(),
+            },
             Hero,
             Hunter,
             Sprite {
