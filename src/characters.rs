@@ -20,3 +20,6 @@ pub struct Character {
 
 #[derive(Component)]
 pub struct ActiveHero;
+
+#[derive(Component)]
+pub struct ArenaBossText;

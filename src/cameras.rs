@@ -30,10 +30,7 @@ pub fn setup_camera(mut commands: Commands) {
 }
 
 fn update_camera_scale_position_by_arena(
-    arena_query: Query<
-        (&Arenas, &Transform),
-        (With<ActiveArena>, Without<Camera>, Changed<ActiveArena>),
-    >,
+    arena_query: Query<(&Arenas, &Transform), (With<ActiveArena>, Without<Camera>)>,
     state: Res<GlobalState>,
     mut camera: Query<(&mut OrthographicProjection, &mut Transform), With<Camera>>,
 ) {
@@ -46,18 +43,15 @@ fn update_camera_scale_position_by_arena(
         camera_transform.translation = MENU_POS;
     } else {
         if let Ok((arena, arena_transform)) = arena_query.get_single() {
-            let (_, arena_y) = arena_offset(arena.order);
-            let y = -arena_y + ARENA_HEIGHT;
-            let pos = Vec3::new(
-                arena_transform.translation.x - ARENA_WIDTH,
-                y,
-                arena_transform.translation.z,
-            );
-            info!("Camera scale position: {:?}", pos);
+            let x = arena_transform.translation.x - ARENA_WIDTH;
+            let y = arena_transform.translation.y + ARENA_HEIGHT;
+            let pos = Vec3::new(x, y, arena_transform.translation.z);
+
             projection.scale = GAME_SCALE;
+
             camera_transform.translation = pos;
         } else {
-            // info!("Camera has no active menu");
+            info!("Camera has no active menu");
         }
     }
 }
@@ -116,12 +110,11 @@ fn highlight_arena_system(
         return;
     }
     if let Ok((arena, transform)) = active_arena.get_single() {
-        
         let border_width = 8;
         let half_border_width = 4.0;
         for i in 0..border_width {
-            let x = transform.translation.x - ARENA_WIDTH  - half_border_width + i as f32; 
-            let y = transform.translation.y + ARENA_HEIGHT - half_border_width + i as f32; 
+            let x = transform.translation.x - ARENA_WIDTH - half_border_width + i as f32;
+            let y = transform.translation.y + ARENA_HEIGHT - half_border_width + i as f32;
             let pos = Vec2::new(x, y);
             gizmos.rect_2d(
                 pos,

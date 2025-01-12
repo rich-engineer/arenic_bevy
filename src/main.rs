@@ -2,12 +2,14 @@ mod arenas;
 mod cameras;
 mod characters;
 mod constants;
+mod hud;
 mod intro;
 mod scenes;
 mod state;
 mod title;
 
-use crate::intro::intro_spawn_guildmaster_and_recruit;
+use crate::hud::HUDPlugin;
+use crate::intro::{intro_spawn_guildmaster_and_recruit, IntroPlugin};
 use arenas::setup_arenas;
 use bevy::prelude::*;
 use cameras::{setup_camera, CamerasPlugin};
@@ -41,5 +43,7 @@ fn main() {
                 intro_spawn_guildmaster_and_recruit.after(setup_arenas),
             ),
         )
+        .add_plugins(IntroPlugin)
+        .add_plugins(HUDPlugin)
         .run();
 }

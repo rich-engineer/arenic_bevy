@@ -104,10 +104,10 @@ pub fn setup_arenas(
             _ => {}
         }
 
-        cmd.set_parent(arenas_container_entity);
-        // .with_children(|tiles_parent| {
-        //     setup_tiles(tiles_parent, meshes.as_mut(), materials.as_mut());
-        // });
+        cmd.set_parent(arenas_container_entity)
+            .with_children(|tiles_parent| {
+                setup_tiles(tiles_parent, meshes.as_mut(), materials.as_mut());
+            });
     }
 }
 
@@ -132,8 +132,8 @@ fn setup_tiles(
 
     for col in 0..GRID_WIDTH {
         for row in 0..GRID_HEIGHT {
-            let x = col as f32 * TILE_SIZE - ARENA_WIDTH_HALF;
-            let y = -(row as f32 * TILE_SIZE - ARENA_HEIGHT_HALF);
+            let x = col as f32 * TILE_SIZE - ARENA_WIDTH_HALF + (TILE_SIZE / 2.0);
+            let y = -(row as f32 * TILE_SIZE - ARENA_HEIGHT_HALF) + (TILE_SIZE / 2.0);
 
             // Spawn the parent white rectangle
             commands
