@@ -41,7 +41,7 @@ fn create_top_navigation(commands: &mut ChildBuilder, text: &str, font: Handle<F
                 height: Val::Percent(5.9),
                 ..default()
             },
-            BackgroundColor(Color::Srgba(GRAY_50)),
+            BackgroundColor(Color::Srgba(RED_400)),
         ))
         .with_children(spawn_progress_bar)
         .with_children(|parent| spawn_arena_boss(parent, text, font));

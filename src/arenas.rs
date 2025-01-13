@@ -1,7 +1,4 @@
-use crate::constants::{
-    ARENA_HEIGHT, ARENA_HEIGHT_HALF, ARENA_WIDTH, ARENA_WIDTH_HALF, GRID_HEIGHT, GRID_WIDTH,
-    TILE_SIZE,
-};
+use crate::constants::{ARENA_HEIGHT, ARENA_HEIGHT_HALF, ARENA_WIDTH, ARENA_WIDTH_HALF, GRID_HEIGHT, GRID_WIDTH, MENU_POS, TILE_SIZE};
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -45,10 +42,11 @@ pub fn setup_arenas(
     let arenas_container_entity = if let Ok(entity) = parent.get_single() {
         entity // Returns Entity
     } else {
+        let y = ARENA_HEIGHT + 70.0;
         commands
             .spawn((
                 ArenasContainer,
-                Transform::from_xyz(-ARENA_WIDTH, ARENA_HEIGHT, 0.0),
+                Transform::from_xyz(-ARENA_WIDTH, y, 0.0),
                 InheritedVisibility::default(),
                 GlobalTransform::default(),
             ))
@@ -57,7 +55,7 @@ pub fn setup_arenas(
 
     for i in 0..9 {
         let (x, y) = arena_offset(i);
-        let color = Color::hsl(360. * i as f32 / 9.0, 0.95, 0.7);
+        let color = Color::hsl(360.0, 0.95, 0.7);
 
         // Spawn the entity, capturing the SpawnCommands so we can insert the marker
         let mut cmd = commands.spawn((
@@ -104,10 +102,10 @@ pub fn setup_arenas(
             _ => {}
         }
 
-        cmd.set_parent(arenas_container_entity)
-            .with_children(|tiles_parent| {
-                setup_tiles(tiles_parent, meshes.as_mut(), materials.as_mut());
-            });
+        cmd.set_parent(arenas_container_entity);
+            // .with_children(|tiles_parent| {
+            //     setup_tiles(tiles_parent, meshes.as_mut(), materials.as_mut());
+            // });
     }
 }
 

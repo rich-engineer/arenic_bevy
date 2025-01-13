@@ -1,5 +1,5 @@
 use crate::arenas::{ActiveArena, Arenas};
-use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS, MENU_SCALE};
+use crate::constants::{ARENA_HEIGHT, ARENA_WIDTH, GAME_SCALE, MENU_POS, MENU_SCALE, TILE_SIZE};
 use crate::state::GlobalState;
 use bevy::color::palettes::tailwind::GRAY_50;
 use bevy::prelude::*;
@@ -44,7 +44,7 @@ fn update_camera_scale_position_by_arena(
     } else {
         if let Ok((_, arena_transform)) = arena_query.get_single() {
             let x = arena_transform.translation.x - ARENA_WIDTH;
-            let y = arena_transform.translation.y + ARENA_HEIGHT;
+            let y = arena_transform.translation.y + ARENA_HEIGHT + 92.0/2.0 + TILE_SIZE;
             let pos = Vec3::new(x, y, arena_transform.translation.z);
 
             projection.scale = GAME_SCALE;
@@ -110,11 +110,11 @@ fn highlight_arena_system(
         return;
     }
     if let Ok((_, transform)) = active_arena.get_single() {
-        let border_width = 8;
-        let half_border_width = 4.0;
+        let border_width = 4;
+        let half_border_width = 2.0;
         for i in 0..border_width {
             let x = transform.translation.x - ARENA_WIDTH - half_border_width + i as f32;
-            let y = transform.translation.y + ARENA_HEIGHT - half_border_width + i as f32;
+            let y = transform.translation.y + 92.0 + ARENA_HEIGHT - half_border_width + i as f32;
             let pos = Vec2::new(x, y);
             gizmos.rect_2d(
                 pos,

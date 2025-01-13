@@ -42,7 +42,7 @@ pub fn intro_spawn_guildmaster_and_recruit(
     let player_selected = asset_server.load("UI/player_selected.png");
     commands
         .spawn((
-            Transform::from_xyz(x - (TILE_SIZE * 4.0), y, 9.0),
+            Transform::from_xyz(0.0, 0.0, 9.0),
             InheritedVisibility::default(),
             GlobalTransform::default(),
             Character {
@@ -62,26 +62,26 @@ pub fn intro_spawn_guildmaster_and_recruit(
         .set_parent(entity)
         .with_children(|parent| spawn_shadow(parent, player_selected.clone(), true));
 
-    commands
-        .spawn((
-            Transform::from_xyz(x + (TILE_SIZE * 4.0), y, 9.0),
-            InheritedVisibility::default(),
-            GlobalTransform::default(),
-            Character {
-                name: "Matthew".to_string(),
-            },
-            Hero,
-            Hunter,
-            Sprite {
-                image: texture.clone(),
-                custom_size: Some(Vec2::new(19.0, 19.0)),
-                ..default()
-            },
-            // EventTimeline::default(),
-            // RecordMode::Empty,
-        ))
-        .set_parent(entity)
-        .with_children(|parent| spawn_shadow(parent, player_selected.clone(), false));
+    // commands
+    //     .spawn((
+    //         Transform::from_xyz(0.0 + 0.0, y, 9.0),
+    //         InheritedVisibility::default(),
+    //         GlobalTransform::default(),
+    //         Character {
+    //             name: "Matthew".to_string(),
+    //         },
+    //         Hero,
+    //         Hunter,
+    //         Sprite {
+    //             image: texture.clone(),
+    //             custom_size: Some(Vec2::new(19.0, 19.0)),
+    //             ..default()
+    //         },
+    //         // EventTimeline::default(),
+    //         // RecordMode::Empty,
+    //     ))
+    //     .set_parent(entity)
+    //     .with_children(|parent| spawn_shadow(parent, player_selected.clone(), false));
 }
 
 fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>, initially_visible: bool) {
@@ -120,96 +120,73 @@ pub fn update_shadow_visibility(
     }
 }
 
-fn move_active_hero(
+fn move_and_transition_active_hero(
+    mut commands: Commands,
     active_arena_query: Query<(Entity, &Arenas), With<ActiveArena>>,
-    mut heroes_query: Query<(&Parent, &mut Transform), With<ActiveHero>>,
+    mut heroes_query: Query<(&Parent, &mut Transform, Entity), With<ActiveHero>>,
+    arena_query: Query<(Entity, &Arenas)>,
     input: Res<ButtonInput<KeyCode>>,
 ) {
-    let Ok((active_arena_entity, arena)) = active_arena_query.get_single() else {
-        warn!("Move: No active arena found or multiple arenas marked as active!");
+
+    // 1. Get the single active arena.
+    let Ok((active_arena_entity, active_arena)) = active_arena_query.get_single() else {
+        warn!("Move+Transition: No active arena found or multiple arenas marked as active!");
         return;
     };
-    let Some((_, mut hero_transform)) = heroes_query
+
+    // 2. Find the hero in that active arena.
+    let Some((_, mut hero_transform, hero_entity)) = heroes_query
         .iter_mut()
         .find(|(parent, ..)| parent.get() == active_arena_entity)
     else {
-        warn!("Move: No selected hero found in the active arena!");
+        warn!("Move+Transition: No selected hero found in the active arena!");
         return;
     };
-    let hero_x = hero_transform.translation.x;
-    let hero_y = hero_transform.translation.y;
+    let mut new_arena_id: Option<usize> = None;
+    let mut new_arena_translation = hero_transform.translation;
+    info!("move_and_transition_active_hero 1: {}, {}, L {},R  {} ", hero_transform.translation.x, hero_transform.translation.y,  LEFT_BOUND, RIGHT_BOUND);
+
     if input.just_pressed(KeyCode::KeyS) {
-        if BOTTOM_ROW.contains(&arena.order) && hero_y < BOTTOM_BOUND {
-            info!("BOT_ROW selected! {}", ARENA_WIDTH_HALF - 1.0);
+        if BOTTOM_ROW.contains(&active_arena.order) && hero_transform.translation.y < BOTTOM_BOUND {
+            new_arena_id = Some(active_arena.order + TOTAL_COLS as usize);
+            new_arena_translation.y = TOP_BOUND;
+            info!("Moved Left")
         } else {
             hero_transform.translation.y -= TILE_SIZE;
         }
     }
     if input.just_pressed(KeyCode::KeyA) {
-        if LEFT_COL.contains(&arena.order) && hero_x < LEFT_BOUND {
-            info!("LEFT_COL selected! {}", ARENA_WIDTH_HALF - 1.0);
+        if !LEFT_COL.contains(&active_arena.order) && hero_transform.translation.x < LEFT_BOUND {
+
+            new_arena_id = Some(active_arena.order - 1);
+            // Put hero on the right edge of the new arena
+            new_arena_translation.x = RIGHT_BOUND + TILE_SIZE;
+            info!("Moved Left")
         } else {
             hero_transform.translation.x -= TILE_SIZE;
         }
     }
     if input.just_pressed(KeyCode::KeyD) {
-        if RIGHT_COL.contains(&arena.order) && hero_x > RIGHT_BOUND {
-            info!("RIGHT_COL selected! {}", ARENA_WIDTH_HALF - 1.0);
+        if !RIGHT_COL.contains(&active_arena.order) && hero_transform.translation.x > RIGHT_BOUND {
+            new_arena_id = Some(active_arena.order + 1);
+            new_arena_translation.x = LEFT_BOUND - TILE_SIZE;
+            info!("Moved Right")
         } else {
             hero_transform.translation.x += TILE_SIZE;
         }
     }
     if input.just_pressed(KeyCode::KeyW) {
-        if TOP_ROW.contains(&arena.order) && hero_y > TOP_BOUND {
-            info!("TOP_ROW selected! {}", ARENA_HEIGHT / 2.0);
+        if TOP_ROW.contains(&active_arena.order) && hero_transform.translation.y > TOP_BOUND {
+            new_arena_id = Some(active_arena.order - TOTAL_COLS as usize);
+            new_arena_translation.y = BOTTOM_BOUND;
         } else {
             hero_transform.translation.y += TILE_SIZE;
         }
     }
-}
-fn transition_hero_to_new_active_arena(
-    mut commands: Commands,
-    active_arena_query: Query<(Entity, &Arenas), With<ActiveArena>>,
-    mut hero_query: Query<(Entity, &Parent, &mut Transform), With<ActiveHero>>,
-    arena_query: Query<(Entity, &Arenas)>,
-) {
-    let Ok((active_arena_entity, active_arena)) = active_arena_query.get_single() else {
-        warn!("Transition:  No active arena found or multiple arenas marked as active!");
-        return;
-    };
-    let Some((hero_entity, _, hero_transform)) = hero_query
-        .iter_mut()
-        .find(|(_, parent, _)| parent.get() == active_arena_entity)
-    else {
-        info!("Transition: No active Here Entity!");
-        return;
-    };
-    let hero_x = hero_transform.translation.x;
-    let hero_y = hero_transform.translation.y;
-    let mut new_arena_id: Option<usize> = None;
-    let mut new_arena_translation = hero_transform.translation;
 
-    if hero_x < LEFT_BOUND && !LEFT_COL.contains(&active_arena.order) {
-        new_arena_id = Some(active_arena.order - 1);
-        new_arena_translation.x = RIGHT_BOUND - TILE_SIZE;
-    }
-    // Move right → arena.order + 1
-    else if hero_x > (RIGHT_BOUND - TILE_SIZE) && !RIGHT_COL.contains(&active_arena.order) {
-        new_arena_id = Some(active_arena.order + 1);
-        new_arena_translation.x = LEFT_BOUND;
-    }
-    // Move up → arena.order - TOTAL_COLS
-    else if hero_y > TOP_BOUND && !TOP_ROW.contains(&active_arena.order) {
-        new_arena_id = Some(active_arena.order - TOTAL_COLS as usize);
-        new_arena_translation.y = BOTTOM_BOUND;
-    }
-    // Move down → arena.order + TOTAL_COLS
-    else if hero_y < BOTTOM_BOUND && !BOTTOM_ROW.contains(&active_arena.order) {
-        new_arena_id = Some(active_arena.order + TOTAL_COLS as usize);
-        new_arena_translation.y = TOP_BOUND;
-    }
+    // 6. If we need a new arena, re-parent the hero.
     if let Some(next_arena_id) = new_arena_id {
-        // Find the new arena entity by its `Arena.id`.
+        // Find the new arena entity by its `Arenas.order`.
         let Some((new_arena_entity, _)) = arena_query
             .iter()
             .find(|(_, arena)| arena.order == next_arena_id)
@@ -219,16 +196,13 @@ fn transition_hero_to_new_active_arena(
         };
         commands.entity(active_arena_entity).remove::<ActiveArena>();
         commands.entity(new_arena_entity).insert(ActiveArena);
-        // Re-parent the hero to the new arena and move them appropriately.
-        commands
-            .entity(hero_entity)
-            .set_parent(new_arena_entity)
-            .insert(Transform {
-                translation: new_arena_translation,
-                ..Default::default()
-            });
+
+        hero_transform.translation = new_arena_translation;
+        commands.entity(hero_entity).set_parent(new_arena_entity);
     }
 }
+
+
 
 pub fn cycle_selected_hero_system(
     input: Res<ButtonInput<KeyCode>>,
@@ -289,9 +263,7 @@ pub fn cycle_selected_hero_system(
         }
     }
 }
-fn tab_keys_pressed(input: Res<ButtonInput<KeyCode>>) -> bool {
-    input.just_pressed(KeyCode::Tab)
-}
+
 fn move_keys_pressed(input: Res<ButtonInput<KeyCode>>) -> bool {
     input.just_pressed(KeyCode::KeyS)
         || input.just_pressed(KeyCode::KeyW)
@@ -306,9 +278,14 @@ impl Plugin for IntroPlugin {
         app.add_systems(
             Update,
             (
-                move_active_hero.run_if(move_keys_pressed),
+                // Optionally keep your cycle_selected_hero_system
                 cycle_selected_hero_system.run_if(move_keys_pressed),
-                transition_hero_to_new_active_arena.after(cycle_selected_hero_system),
+
+                // Replace move_active_hero + transition_hero_to_new_active_arena
+                // with move_and_transition_active_hero
+                move_and_transition_active_hero.run_if(move_keys_pressed),
+
+                // Keep your shadow updates, if needed
                 update_shadow_visibility.after(cycle_selected_hero_system),
             )
         );
