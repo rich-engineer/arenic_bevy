@@ -60,7 +60,7 @@ pub fn intro_spawn_guildmaster_and_recruit(
             // RecordMode::Empty,
         ))
         .set_parent(entity)
-        .with_children(|parent| spawn_shadow(parent, player_selected.clone()));
+        .with_children(|parent| spawn_shadow(parent, player_selected.clone(), true));
 
     commands
         .spawn((
@@ -81,10 +81,10 @@ pub fn intro_spawn_guildmaster_and_recruit(
             // RecordMode::Empty,
         ))
         .set_parent(entity)
-        .with_children(|parent| spawn_shadow(parent, player_selected.clone()));
+        .with_children(|parent| spawn_shadow(parent, player_selected.clone(), false));
 }
 
-fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>) {
+fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>, initially_visible: bool) {
     commands.spawn((
         Transform::from_xyz(0.0, 0.0, -0.01),
         GlobalTransform::default(),
@@ -95,7 +95,11 @@ fn spawn_shadow(commands: &mut ChildBuilder, texture: Handle<Image>) {
             custom_size: Some(Vec2::new(24.0, 24.0)),
             ..default()
         },
-        Visibility::Hidden,
+        if initially_visible {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        },
     ));
 }
 pub fn update_shadow_visibility(
@@ -293,6 +297,7 @@ fn move_keys_pressed(input: Res<ButtonInput<KeyCode>>) -> bool {
         || input.just_pressed(KeyCode::KeyW)
         || input.just_pressed(KeyCode::KeyA)
         || input.just_pressed(KeyCode::KeyD)
+    || input.just_pressed(KeyCode::Tab)
 }
 pub struct IntroPlugin;
 
@@ -300,12 +305,12 @@ impl Plugin for IntroPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (move_active_hero, transition_hero_to_new_active_arena).run_if(move_keys_pressed),
-        )
-        .add_systems(
-            Update,
-            (cycle_selected_hero_system).run_if(tab_keys_pressed),
-        )
-        .add_systems(Update, update_shadow_visibility);
+            (
+                move_active_hero.run_if(move_keys_pressed),
+                cycle_selected_hero_system.run_if(move_keys_pressed),
+                transition_hero_to_new_active_arena.after(cycle_selected_hero_system),
+                update_shadow_visibility.after(cycle_selected_hero_system),
+            )
+        );
     }
 }
